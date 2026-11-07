@@ -16,7 +16,7 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import config, doctor, emit, filing, index, init, ledger, names, pdf, sensitive  # noqa: E402
+from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, sensitive  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -93,6 +93,15 @@ def build_parser() -> _Parser:
     padopt.add_argument("--root", required=True)
 
     sub.add_parser("scan", help="folders up to depth 2 with file counts, names only")
+
+    sub.add_parser("inbox", help="what is waiting in the inbox: duplicates, quarantine, suggested names")
+
+    papp = sub.add_parser("intake-apply", help="file the approved documents of _proposal.json (1-based numbers)")
+    papp.add_argument("--approve", required=True, help="comma-separated document numbers, e.g. 1,3")
+    papp.add_argument("--name", action="append", default=[], metavar="N=NAME", help="corrected name for document N")
+    papp.add_argument("--folder", action="append", default=[], metavar="N=FOLDER", help="corrected folder for document N")
+    papp.add_argument("--mkdir", default="", help="comma-separated document numbers whose new folder was approved")
+    papp.add_argument("--proposal", help="path of the proposal file (default: <inbox>/_proposal.json)")
     return p
 
 
@@ -195,6 +204,34 @@ def cmd_scan(args) -> dict:
     return {"ok": True, **init.scan(load_cfg(args))}
 
 
+def cmd_inbox(args) -> dict:
+    return {"ok": True, "files": inbox.list_inbox(load_cfg(args))}
+
+
+def _numbered(pairs: list[str]) -> dict:
+    out = {}
+    for s in pairs:
+        n, _, value = s.partition("=")
+        if not n.strip().isdigit() or not value:
+            raise CliError(f"expected N=value, got {s!r}")
+        out[int(n) - 1] = value
+    return out
+
+
+def cmd_intake_apply(args) -> dict:
+    cfg = load_cfg(args)
+    path = Path(args.proposal) if args.proposal else cfg.path("inbox") / inbox.PROPOSAL
+    if not path.is_file():
+        raise CliError(f"proposal file not found: {path}")
+    proposal = json.loads(path.read_text(encoding="utf-8"))
+    approved = [int(x) - 1 for x in _split_list(args.approve)]
+    mk = {int(x) - 1 for x in _split_list(args.mkdir)}
+    results = inbox.apply(cfg, proposal, approved, names=_numbered(args.name), folders=_numbered(args.folder), mkdir=mk)
+    for r in results:
+        r["i"] = r["i"] + 1
+    return {"ok": all(r.get("ok") for r in results), "results": results}
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
@@ -207,6 +244,8 @@ HANDLERS = {
     "init": cmd_init,
     "adopt": cmd_adopt,
     "scan": cmd_scan,
+    "inbox": cmd_inbox,
+    "intake-apply": cmd_intake_apply,
 }
 
 
