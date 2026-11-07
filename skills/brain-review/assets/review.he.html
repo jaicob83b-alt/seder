@@ -52,7 +52,7 @@ footer{color:var(--ink2);font-size:13px;border-top:1px solid var(--line);padding
 
 <section class="card">
   <h2>מסמכים חוזרים שחסרים</h2>
-  <ul>{{#gaps}}<li><b>{{type}}</b>{{#whose}} · {{whose}}{{/whose}}{{#counterparty}} · {{counterparty}}{{/counterparty}} <span class="tag">כל {{every_months}} חודשים</span><br>חסר: <b>{{missing}}</b> <span class="muted">(אחרון: {{last}})</span></li>{{/gaps}}</ul>
+  <ul>{{#gaps}}<li><b>{{type}}</b>{{#whose}} · {{whose}}{{/whose}}{{#counterparty}} · {{counterparty}}{{/counterparty}} <span class="tag">כל {{every_months}} חודשים</span><br>חסר: <b>{{missing}}</b> <span class="muted">(אחרון: {{last}}{{#older}}, ועוד {{older}} חודשים ישנים יותר{{/older}})</span></li>{{/gaps}}</ul>
   {{^gaps}}<p class="muted">אין חוסרים בסדרות שזוהו. סדרה מזוהה אחרי שלושה מסמכים באותו קצב.</p>{{/gaps}}
 </section>
 

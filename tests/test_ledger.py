@@ -45,7 +45,8 @@ def test_gap_detection_monthly(home):
     for p in ["2026-05", "2026-06", "2026-07", "2026-09"]:
         ledger.append(cfg, rec(path=f"01_כספים/{p}_חשבון חשמל - דנה.pdf", type="חשבון חשמל", whose="דנה", period=p, source="name"))
     gaps = ledger.recurring_gaps(cfg, date(2026, 11, 7))
-    assert gaps == [{"type": "חשבון חשמל", "whose": "דנה", "counterparty": "", "every_months": 1, "missing": ["2026-08"], "last": "2026-09"}]
+    assert gaps == [{"type": "חשבון חשמל", "whose": "דנה", "counterparty": "", "every_months": 1, "missing": ["2026-08"],
+                     "missing_total": 1, "older": 0, "last": "2026-09"}]
 
 
 def test_gap_detection_flags_overdue_after_grace(home):
@@ -61,7 +62,27 @@ def test_gap_detection_bimonthly(home):
     for p in ["2026-01", "2026-03", "2026-07"]:
         ledger.append(cfg, rec(path=f"01_כספים/{p}_x.pdf", type="ארנונה", whose="בית", period=p))
     gaps = ledger.recurring_gaps(cfg, date(2026, 9, 1))
-    assert gaps == [{"type": "ארנונה", "whose": "בית", "counterparty": "", "every_months": 2, "missing": ["2026-05"], "last": "2026-07"}]
+    assert gaps == [{"type": "ארנונה", "whose": "בית", "counterparty": "", "every_months": 2, "missing": ["2026-05"],
+                     "missing_total": 1, "older": 0, "last": "2026-07"}]
+
+
+def test_gap_detection_reports_only_recent_months(home):
+    cfg = config.Config.load(home)
+    periods = ["2021-03", "2021-05", "2021-06", "2021-08"] + [f"2026-{m:02d}" for m in (1, 2, 3, 5, 6, 7, 9)]
+    for p in periods:
+        ledger.append(cfg, rec(path=f"01_כספים/{p}_תלוש שכר - דנה.pdf", type="תלוש שכר", whose="דנה", period=p))
+    gaps = ledger.recurring_gaps(cfg, date(2026, 11, 7))
+    assert gaps[0]["missing"] == ["2025-11", "2025-12", "2026-04", "2026-08"]   # 12-month window; 2021 holes are history
+    assert gaps[0]["missing_total"] >= 50 and gaps[0]["older"] == gaps[0]["missing_total"] - 4
+    assert ledger.recurring_gaps(cfg, date(2026, 11, 7), lookback_months=3)[0]["missing"] == ["2026-08"]
+
+
+def test_gap_detection_drops_series_that_ended_before_the_window(home):
+    cfg = config.Config.load(home)
+    for p in ["2023-01", "2023-02", "2023-03", "2023-05"]:   # a supplier that stopped in 2023
+        ledger.append(cfg, rec(path=f"01_כספים/{p}_חשבונית ספק ישן - עסק.pdf", type="חשבונית ספק ישן", whose="עסק", period=p))
+    assert ledger.recurring_gaps(cfg, date(2026, 11, 7)) == []
+    assert ledger.recurring_gaps(cfg, date(2023, 8, 1))[0]["missing"] == ["2023-04", "2023-06"]
 
 
 def test_gap_detection_skips_bad_periods_and_short_series(home):

@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: file-two-page-letter
+expected_outcome: |
+  Both photos become one two-page PDF named 2026-09_<type> - Dana.pdf under root/02_Home (a property subfolder is fine),
+  the inbox no longer lists the photos as pending, the intake log has a row with an undo command, the ledger has a row
+  with amount 412.30 and due date 2026-10-20, and no file was moved with a shell command.
+context:
+  scaffold_script: place-files.sh

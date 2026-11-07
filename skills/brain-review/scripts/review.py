@@ -49,7 +49,9 @@ def _pending_inbox(cfg) -> int:
     box = cfg.path("inbox")
     if not box.is_dir():
         return 0
-    return sum(1 for p in box.iterdir() if p.is_file() and not p.name.startswith(("_", ".", "~$")))
+    # same rule as inbox.list_inbox: side files (_proposal.json, a source's state .json) are not documents
+    return sum(1 for p in box.iterdir()
+               if p.is_file() and not p.name.startswith(("_", ".", "~$")) and p.suffix.lower() != ".json")
 
 
 def _archive_candidates(cfg, today: dt.date) -> list[dict]:

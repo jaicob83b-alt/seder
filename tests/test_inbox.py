@@ -39,6 +39,15 @@ def test_list_marks_duplicates_and_held(home):
     assert all(set(f) == {"file", "size", "ext", "sha12", "dup_of", "held", "held_why", "suggested_name"} for f in files)
 
 
+def test_list_ignores_state_and_proposal_files(home):
+    cfg = config.Config.load(home)
+    (home / "_נכנס" / "sources_state.json").write_text("{}", encoding="utf-8")   # a source module's state file
+    (home / "_נכנס" / "_proposal.json").write_text("{}", encoding="utf-8")
+    (home / "_נכנס" / "notes.txt").write_text("x", encoding="utf-8")
+    make_image(home / "_נכנס" / "photo.jpg")
+    assert [f["file"] for f in inbox.list_inbox(cfg)] == ["notes.txt", "photo.jpg"]
+
+
 def test_list_holds_by_text_not_only_name(home):
     cfg = config.Config.load(home)
     # the synthetic PDF's base font has no Hebrew glyphs, so the text check uses the English default words

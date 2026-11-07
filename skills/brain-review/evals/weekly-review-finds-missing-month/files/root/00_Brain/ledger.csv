@@ -1,0 +1,7 @@
+﻿path,type,counterparty,whose,period,amount,currency,due,action,recurring,done,source
+02_Home/Elm Street/Utilities/2026-04_electricity bill - Dana.pdf,bill,Elm Street Property,Dana,2026-04,412.30,ILS,,,monthly,,intake
+02_Home/Elm Street/Utilities/2026-05_electricity bill - Dana.pdf,bill,Elm Street Property,Dana,2026-05,412.30,ILS,,,monthly,,intake
+02_Home/Elm Street/Utilities/2026-06_electricity bill - Dana.pdf,bill,Elm Street Property,Dana,2026-06,412.30,ILS,,,monthly,,intake
+02_Home/Elm Street/Utilities/2026-07_electricity bill - Dana.pdf,bill,Elm Street Property,Dana,2026-07,412.30,ILS,,,monthly,,intake
+02_Home/Elm Street/Utilities/2026-09_electricity bill - Dana.pdf,bill,Elm Street Property,Dana,2026-09,412.30,ILS,,,monthly,,intake
+01_Finance/Bank/2026-10_tax notice - Dana.pdf,notice,Tax office,Dana,2026-10,1200,ILS,2026-11-30,pay,one-off,,intake

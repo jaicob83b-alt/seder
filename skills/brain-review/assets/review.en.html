@@ -52,7 +52,7 @@ footer{color:var(--ink2);font-size:13px;border-top:1px solid var(--line);padding
 
 <section class="card">
   <h2>Recurring documents that are missing</h2>
-  <ul>{{#gaps}}<li><b>{{type}}</b>{{#whose}} · {{whose}}{{/whose}}{{#counterparty}} · {{counterparty}}{{/counterparty}} <span class="tag">every {{every_months}} months</span><br>missing: <b>{{missing}}</b> <span class="muted">(last: {{last}})</span></li>{{/gaps}}</ul>
+  <ul>{{#gaps}}<li><b>{{type}}</b>{{#whose}} · {{whose}}{{/whose}}{{#counterparty}} · {{counterparty}}{{/counterparty}} <span class="tag">every {{every_months}} months</span><br>missing: <b>{{missing}}</b> <span class="muted">(last: {{last}}{{#older}}, plus {{older}} older months{{/older}})</span></li>{{/gaps}}</ul>
   {{^gaps}}<p class="muted">No gaps in the series found so far. A series is recognised after three documents at the same rhythm.</p>{{/gaps}}
 </section>
 

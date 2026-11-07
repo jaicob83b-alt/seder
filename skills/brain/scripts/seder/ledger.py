@@ -95,14 +95,17 @@ def _ym_str(i: int) -> str:
     return f"{i // 12:04d}-{i % 12 + 1:02d}"
 
 
-def recurring_gaps(cfg: Config, today: date) -> list[dict]:
+def recurring_gaps(cfg: Config, today: date, lookback_months: int = 12) -> list[dict]:
     """Document series with a regular monthly rhythm, and the periods that are missing.
 
     A series needs three periods of the form YYYY-MM. The rhythm is the gcd of
     the intervals (1, 2, 3, 6 or 12 months) and at least half the intervals
     must equal it. Expected periods run from the first one to the later of the
     last one and the horizon: today's month minus one month of grace minus one
-    rhythm, so a bill that is simply not due yet is not reported.
+    rhythm, so a bill that is simply not due yet is not reported. `missing`
+    lists only holes inside the last `lookback_months` months (older holes are
+    history, not this week's work); `missing_total` counts all of them and
+    `older` the ones left out.
     """
     groups: dict[tuple, set] = defaultdict(set)
     for r in rows(cfg):
@@ -120,11 +123,16 @@ def recurring_gaps(cfg: Config, today: date) -> list[dict]:
         if every not in ALLOWED_EVERY or sum(d == every for d in diffs) * 2 < len(diffs):
             continue
         have = set(idxs)
+        since = today_idx - lookback_months
+        if idxs[-1] < since:
+            continue  # the series ended before the window: a closed supplier, not a gap
         end = max(idxs[-1], today_idx - 1 - every)
-        missing = [_ym_str(i) for i in range(idxs[0], end + 1, every) if i not in have]
-        if missing:
+        all_missing = [i for i in range(idxs[0], end + 1, every) if i not in have]
+        recent = [_ym_str(i) for i in all_missing if i >= since]
+        if recent:
             out.append({"type": key[0], "whose": key[1], "counterparty": key[2],
-                        "every_months": every, "missing": missing, "last": _ym_str(idxs[-1])})
+                        "every_months": every, "missing": recent, "missing_total": len(all_missing),
+                        "older": len(all_missing) - len(recent), "last": _ym_str(idxs[-1])})
     return out
 
 

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: find-august-electricity-bill
+expected_outcome: |
+  The answer gives the path 02_Home/Elm Street/Utilities/2026-08_electricity bill - Dana.pdf (either slash style),
+  found from the index, without reading the content of any PDF.
+context:
+  scaffold_script: place-files.sh

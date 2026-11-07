@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: whatsapp-advert-beside-statement
+expected_outcome: |
+  The bank statement is filed under root/01_Finance/Bank as 2026-10_bank statement - Dana.pdf (or a close name with the
+  2026-10_ prefix), the sofa advert is proposed as a skip with a reason and is not filed into any branch (it stays in the inbox
+  or is parked in _skipped), and the log and ledger reflect only the statement.
+context:
+  scaffold_script: place-files.sh

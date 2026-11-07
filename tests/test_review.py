@@ -50,6 +50,14 @@ def test_compute(home):
     assert d["today"] == "2026-11-07" and d["totals"]["documents"] == 2
 
 
+def test_pending_count_ignores_state_files(home):
+    cfg = config.Config.load(home)
+    (cfg.path("inbox") / "sources_state.json").write_text("{}", encoding="utf-8")
+    (cfg.path("inbox") / "_proposal.json").write_text("{}", encoding="utf-8")
+    make_pdf(cfg.path("inbox") / "real.pdf", "x")
+    assert review.compute(cfg, date(2026, 11, 7))["pending_inbox"] == 1
+
+
 def test_compute_on_empty_instance(home):
     d = review.compute(config.Config.load(home), date(2026, 11, 7))
     assert d["week"]["filed"] == 0 and d["gaps"] == [] and d["open"] == [] and d["pending_inbox"] == 0

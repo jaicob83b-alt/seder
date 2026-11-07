@@ -1,0 +1,94 @@
+{
+ "version": 1,
+ "lang": "en",
+ "owner": "Dana",
+ "root": "..",
+ "entities": [
+  "Dana",
+  "Yossi"
+ ],
+ "tree": [
+  {
+   "id": "brain",
+   "num": "00",
+   "name": "Brain",
+   "per_item": false,
+   "subfolders": [],
+   "locked_subfolders": [],
+   "rule": "The system itself: settings, naming, index, ledger, log, _inbox",
+   "physical": "00_Brain",
+   "privacy": "open",
+   "handoff": null
+  },
+  {
+   "id": "finance",
+   "num": "01",
+   "name": "Finance",
+   "per_item": false,
+   "subfolders": [
+    "Bank",
+    "Credit cards",
+    "Loans and mortgage",
+    "Savings and pension",
+    "Tax and social security",
+    "Income and payslips",
+    "History"
+   ],
+   "locked_subfolders": [],
+   "rule": "Everything that is household money",
+   "physical": "01_Finance",
+   "privacy": "open",
+   "handoff": null
+  },
+  {
+   "id": "home",
+   "num": "02",
+   "name": "Home",
+   "per_item": true,
+   "item": "property",
+   "subfolders": [
+    "Purchase or rent",
+    "Building and renovation",
+    "Utilities",
+    "Home insurance",
+    "Building committee"
+   ],
+   "locked_subfolders": [],
+   "rule": "The property itself. The loan on it lives in Finance",
+   "physical": "02_Home",
+   "privacy": "open",
+   "handoff": null
+  },
+  {
+   "id": "family",
+   "num": "03",
+   "name": "Family",
+   "per_item": true,
+   "item": "person",
+   "subfolders": [
+    "IDs and licences",
+    "Health",
+    "Education",
+    "Benefits and social security",
+    "Insurance and savings",
+    "Work",
+    "Misc"
+   ],
+   "locked_subfolders": [
+    "Health"
+   ],
+   "rule": "A document about a person goes to that person",
+   "physical": "03_Family",
+   "privacy": "open",
+   "handoff": null
+  }
+ ],
+ "sources": {
+  "inbox": true,
+  "gmail": false,
+  "whatsapp": false,
+  "downloads": false,
+  "site": false
+ },
+ "remote_warning": false
+}

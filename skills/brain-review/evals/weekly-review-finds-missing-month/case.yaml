@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: weekly-review-finds-missing-month
+expected_outcome: |
+  The review script runs with --today 2026-11-07 --no-open, writes root/00_Brain/weekly_review.html, and the answer's
+  focus paragraph says the August 2026 electricity bill is missing and the tax notice is open with a due date of 2026-11-30.
+context:
+  scaffold_script: place-files.sh

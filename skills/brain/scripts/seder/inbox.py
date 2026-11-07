@@ -46,8 +46,8 @@ def list_inbox(cfg: Config) -> list[dict]:
         return []
     out = []
     for p in sorted(box.iterdir()):
-        if not p.is_file() or p.name.startswith(("_", ".", "~$")):
-            continue
+        if not p.is_file() or p.name.startswith(("_", ".", "~$")) or p.suffix.lower() == ".json":
+            continue  # state and proposal files are never documents
         sha = index.sha12(p)
         text = pdf.text_sample(p) if p.suffix.lower() == ".pdf" else ""
         held_why = _hold_reason(cfg, p.name, text)
