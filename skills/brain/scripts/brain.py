@@ -12,8 +12,11 @@ from pathlib import Path
 # `-I` (isolated mode) does not put the script's folder on sys.path.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import datetime as dt  # noqa: E402
+import json  # noqa: E402
+
 import seder  # noqa: E402
-from seder import config, emit, filing, index, pdf, sensitive  # noqa: E402
+from seder import config, emit, filing, index, ledger, pdf, sensitive  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -61,7 +64,24 @@ def build_parser() -> _Parser:
     pnc.add_argument("folder")
     pnc.add_argument("name")
     pnc.add_argument("--src")
+
+    pled = sub.add_parser("ledger", help="the ledger: add, backfill, gaps, open, done")
+    lsub = pled.add_subparsers(dest="sub", metavar="add|backfill|gaps|open|done")
+    ladd = lsub.add_parser("add", help="add one row from JSON")
+    ladd.add_argument("--json", required=True, help='{"path": ..., "type": ..., ...}')
+    lsub.add_parser("backfill", help="a row for every indexed non-sensitive document without one")
+    lgaps = lsub.add_parser("gaps", help="recurring documents with missing periods")
+    lgaps.add_argument("--today", help="YYYY-MM-DD (default: today)")
+    lopen = lsub.add_parser("open", help="open actions by due date")
+    lopen.add_argument("--today", help="YYYY-MM-DD (default: today)")
+    ldone = lsub.add_parser("done", help="mark the row of PATH as done")
+    ldone.add_argument("path")
+    ldone.add_argument("--when", help="YYYY-MM-DD (default: today)")
     return p
+
+
+def _today(s: str | None) -> dt.date:
+    return dt.date.fromisoformat(s) if s else dt.date.today()
 
 
 def load_cfg(args) -> config.Config:
@@ -112,6 +132,23 @@ def cmd_namecheck(args) -> dict:
     return {"ok": True, **filing.namecheck(cfg, args.folder, args.name, Path(args.src) if args.src else None)}
 
 
+def cmd_ledger(args) -> dict:
+    cfg = load_cfg(args)
+    if args.sub == "add":
+        ledger.append(cfg, json.loads(args.json))
+        return {"ok": True, "added": 1}
+    if args.sub == "backfill":
+        return {"ok": True, "added": ledger.backfill_from_names(cfg)}
+    if args.sub == "gaps":
+        return {"ok": True, "gaps": ledger.recurring_gaps(cfg, _today(args.today))}
+    if args.sub == "open":
+        return {"ok": True, "items": ledger.open_items(cfg, _today(args.today))}
+    if args.sub == "done":
+        when = args.when or dt.date.today().isoformat()
+        return {"ok": True, "done": ledger.mark_done(cfg, args.path, when)}
+    raise CliError("ledger: add | backfill | gaps | open | done")
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
@@ -119,6 +156,7 @@ HANDLERS = {
     "file": cmd_file,
     "index": cmd_index,
     "namecheck": cmd_namecheck,
+    "ledger": cmd_ledger,
 }
 
 
