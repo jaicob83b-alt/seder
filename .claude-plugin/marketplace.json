@@ -1,8 +1,8 @@
 {
   "name": "seder",
   "owner": {
-    "name": "jaicob83b",
-    "url": "https://github.com/jaicob83b"
+    "name": "jaicob83b-alt",
+    "url": "https://github.com/jaicob83b-alt"
   },
   "description": "Seder: a private, approval-first document archive for Claude Code.",
   "plugins": [

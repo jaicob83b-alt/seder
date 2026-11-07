@@ -15,7 +15,7 @@
 ## התקנה
 
 ```
-claude plugin marketplace add jaicob83b/seder
+claude plugin marketplace add jaicob83b-alt/seder
 claude plugin install seder@seder
 ```
 

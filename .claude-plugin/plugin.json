@@ -3,10 +3,10 @@
   "description": "Seder: a private document archive for Claude Code. A standard folder tree, approval-first filing, per-folder privacy levels (open / ask / locked), project cards and a weekly review. No server, no cloud.",
   "version": "0.1.0",
   "author": {
-    "name": "jaicob83b"
+    "name": "jaicob83b-alt"
   },
-  "homepage": "https://github.com/jaicob83b/seder",
-  "repository": "https://github.com/jaicob83b/seder",
+  "homepage": "https://github.com/jaicob83b-alt/seder",
+  "repository": "https://github.com/jaicob83b-alt/seder",
   "license": "MIT",
   "keywords": ["documents", "archive", "privacy", "hebrew", "rtl", "paperwork", "household"]
 }

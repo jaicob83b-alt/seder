@@ -17,7 +17,7 @@ and the ledger. Claude proposes; you decide; the script executes.
 ## Install
 
 ```
-claude plugin marketplace add jaicob83b/seder
+claude plugin marketplace add jaicob83b-alt/seder
 claude plugin install seder@seder
 ```
 
