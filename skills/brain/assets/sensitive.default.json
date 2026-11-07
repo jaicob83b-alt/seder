@@ -1,0 +1,10 @@
+{
+ "_about": "Privacy levels per folder. levels: relative folder -> ask | locked (open = not listed). folder_names: any folder with this name gets the level. medical_folders (= ask) and secret_folders (= locked) are the older list form and are still honoured. secret_patterns are glob patterns of files that are never read.",
+ "levels": {},
+ "folder_names": {"בריאות": "ask", "רפואי": "ask", "Health": "ask", "Medical": "ask"},
+ "medical_folders": [],
+ "secret_folders": [],
+ "secret_patterns": ["**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/id_rsa*", "**/*secret*", "**/*credential*", "**/*password*", "**/*סיסמ*", "**/*token*"],
+ "medical_senders": ["clalit.co.il", "clalit.org.il", "maccabi4u.co.il", "meuhedet.co.il", "leumit.co.il", "health.gov.il"],
+ "medical_words": ["סיכום אשפוז", "סיכום מיון", "בדיקות דם", "רנטגן", "ועדה רפואית", "אבחון", "פסיכ", "קנאביס", "קנביס", "ילד נכה", "discharge summary", "lab results"]
+}

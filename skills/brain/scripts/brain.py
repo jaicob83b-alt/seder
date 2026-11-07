@@ -13,7 +13,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import seder  # noqa: E402
-from seder import emit  # noqa: E402
+from seder import config, emit, sensitive  # noqa: E402
+
+NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
 
 class CliError(Exception):
@@ -27,17 +29,42 @@ class _Parser(argparse.ArgumentParser):
 
 def build_parser() -> _Parser:
     p = _Parser(prog="brain.py", description="Seder: private document archive engine.")
+    p.add_argument("--home", help="instance folder (the one holding brain.json)")
     sub = p.add_subparsers(dest="cmd", metavar="command")
     sub.add_parser("version", help="print the engine version")
+
+    priv = sub.add_parser("privacy", help="per-folder privacy levels: open, ask, locked")
+    psub = priv.add_subparsers(dest="sub", metavar="list|set")
+    psub.add_parser("list", help="show levels and folder-name defaults")
+    pset = psub.add_parser("set", help="set a folder's level")
+    pset.add_argument("folder")
+    pset.add_argument("level", choices=sensitive.LEVELS)
     return p
+
+
+def load_cfg(args) -> config.Config:
+    home = config.find_home(explicit=Path(args.home) if args.home else None)
+    if home is None:
+        raise CliError(NO_HOME)
+    return config.Config.load(home)
 
 
 def cmd_version(args) -> dict:
     return {"ok": True, "version": seder.__version__}
 
 
+def cmd_privacy(args) -> dict:
+    cfg = load_cfg(args)
+    if args.sub == "set":
+        return {"ok": True, "levels": sensitive.set_level(cfg, args.folder, args.level)}
+    g = sensitive.load(cfg)
+    return {"ok": True, "levels": g.get("levels") or {}, "folder_names": g.get("folder_names") or {},
+            "medical_folders": g.get("medical_folders") or [], "secret_folders": g.get("secret_folders") or []}
+
+
 HANDLERS = {
     "version": cmd_version,
+    "privacy": cmd_privacy,
 }
 
 

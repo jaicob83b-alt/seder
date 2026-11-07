@@ -1,0 +1,15 @@
+{
+ "hooks": {
+  "PreToolUse": [
+   {
+    "matcher": "Read|Glob|Grep",
+    "hooks": [
+     {
+      "type": "command",
+      "command": "python -I -X utf8 \"${CLAUDE_PLUGIN_ROOT}/hooks/seder_hook.py\""
+     }
+    ]
+   }
+  ]
+ }
+}
