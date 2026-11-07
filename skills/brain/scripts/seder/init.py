@@ -168,14 +168,21 @@ def _write_proposal(cfg: Config, counts: dict[str, int]) -> None:
     cfg.path("proposed_tree").write_text("\n".join(lines), encoding="utf-8")
 
 
-def adopt(home: Path, root: Path) -> Config:
-    """Register an existing archive as the instance, touching none of its files."""
+def adopt(home: Path, root: Path, addons: list[str] = ()) -> Config:
+    """Register an existing archive as the instance, touching none of its files.
+
+    `addons` (e.g. dev_projects, studies) are appended as new branches with their
+    standard physical names; their folders are created with the first document."""
     home, root = Path(home), Path(root)
     if (home / BRAIN_FILE).exists():
         raise FileExistsError(f"an instance already exists: {home / BRAIN_FILE}")
     if not home.is_dir() or not root.is_dir():
         raise ValueError("home and root must exist")
     lang = _detect_lang(home)
+    known = {a["id"]: a for a in tree.addons(lang)}
+    unknown = [a for a in (addons or []) if a not in known]
+    if unknown:
+        raise ValueError(f"unknown add-on(s): {', '.join(unknown)}; choose from {', '.join(known)}")
     brain_node = dict(tree.default_tree(lang)[0])
     brain_node["physical"] = home.name
     branches = [brain_node]
@@ -186,6 +193,11 @@ def adopt(home: Path, root: Path) -> Config:
             continue
         branches.append(_branch_from_folder(root, home, entry, lang))
         counts[entry] = _count_files(p)
+    taken = {n["physical"] for n in branches}
+    for aid in addons or []:
+        node = dict(known[aid])
+        if node["physical"] not in taken:
+            branches.append(node)
     cfg = Config(home=home, root=root, lang=lang, owner="", entities=[], tree=branches,
                  sources={"inbox": True, "gmail": False, "whatsapp": False, "downloads": False, "site": False},
                  data={"version": 1, "remote_warning": True, "adopted": date.today().isoformat()})

@@ -91,6 +91,7 @@ def build_parser() -> _Parser:
     padopt = sub.add_parser("adopt", help="register an existing archive: adopt --home DIR --root DIR")
     padopt.add_argument("--home", default=argparse.SUPPRESS, help="the existing brain folder")
     padopt.add_argument("--root", required=True)
+    padopt.add_argument("--addons", default="", help="comma-separated addon ids to register, e.g. dev_projects,studies")
 
     sub.add_parser("scan", help="folders up to depth 2 with file counts, names only")
 
@@ -231,7 +232,7 @@ def cmd_init(args) -> dict:
 def cmd_adopt(args) -> dict:
     if not args.home:
         raise CliError("adopt needs --home DIR (the existing brain folder)")
-    cfg = init.adopt(Path(args.home), Path(args.root))
+    cfg = init.adopt(Path(args.home), Path(args.root), _split_list(args.addons))
     return {"ok": True, "home": str(cfg.home), "root": str(cfg.root), "lang": cfg.lang,
             "tree": [{"num": n["num"], "name": n["name"], "physical": n["physical"], "handoff": n["handoff"]} for n in cfg.tree],
             "proposed_tree": str(cfg.path("proposed_tree"))}

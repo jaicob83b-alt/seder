@@ -109,6 +109,16 @@ def test_adopt_marks_medical_named_folders_not_yet_covered(tmp_path):
     assert sensitive.level(cfg, "09_אישי/רפואי_דנה/x.pdf") == "ask"
 
 
+def test_adopt_with_addons_appends_new_branches(tmp_path):
+    root, home = make_legacy(tmp_path)
+    cfg = init.adopt(home, root, addons=["dev_projects", "studies"])
+    assert [n["physical"] for n in cfg.tree][-2:] == ["07_פרויקטי_פיתוח", "08_לימודים"]
+    assert next(n for n in cfg.tree if n["id"] == "studies")["num"] == "08"
+    assert not (root / "08_לימודים").exists()  # registered, not created
+    with pytest.raises(ValueError):
+        init.adopt(tmp_path / "other", root, addons=["nope"])
+
+
 def test_adopt_refuses_when_instance_exists(home):
     with pytest.raises(FileExistsError):
         init.adopt(home, home.parent)
