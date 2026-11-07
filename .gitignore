@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/private_terms.txt
+tests/_tmp/
+*.log
+.env
+# internal planning docs: hold personal details, never committed (see ledger ruling, Task 1)
+docs/superpowers/
+.superpowers/
