@@ -16,7 +16,7 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import config, emit, filing, index, ledger, pdf, sensitive  # noqa: E402
+from seder import config, doctor, emit, filing, index, init, ledger, names, pdf, sensitive  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -77,6 +77,22 @@ def build_parser() -> _Parser:
     ldone = lsub.add_parser("done", help="mark the row of PATH as done")
     ldone.add_argument("path")
     ldone.add_argument("--when", help="YYYY-MM-DD (default: today)")
+
+    sub.add_parser("doctor", help="environment checks and where the instance is")
+
+    pinit = sub.add_parser("init", help="create a new instance: init --home DIR --root DIR --lang he|en --owner NAME")
+    pinit.add_argument("--home", default=argparse.SUPPRESS, help="the brain folder to create")
+    pinit.add_argument("--root", required=True)
+    pinit.add_argument("--lang", default="he", choices=list(names.LANGS))
+    pinit.add_argument("--owner", default="")
+    pinit.add_argument("--entities", default="", help="comma-separated people and businesses")
+    pinit.add_argument("--addons", default="", help="comma-separated addon ids, e.g. dev_projects,studies")
+
+    padopt = sub.add_parser("adopt", help="register an existing archive: adopt --home DIR --root DIR")
+    padopt.add_argument("--home", default=argparse.SUPPRESS, help="the existing brain folder")
+    padopt.add_argument("--root", required=True)
+
+    sub.add_parser("scan", help="folders up to depth 2 with file counts, names only")
     return p
 
 
@@ -149,6 +165,36 @@ def cmd_ledger(args) -> dict:
     raise CliError("ledger: add | backfill | gaps | open | done")
 
 
+def _split_list(s: str) -> list[str]:
+    return [x.strip() for x in (s or "").split(",") if x.strip()]
+
+
+def cmd_doctor(args) -> dict:
+    home = config.find_home(explicit=Path(args.home) if args.home else None)
+    return {"ok": True, "home": str(home) if home else None, "checks": doctor.checks()}
+
+
+def cmd_init(args) -> dict:
+    if not args.home:
+        raise CliError("init needs --home DIR (the brain folder to create)")
+    cfg = init.create(Path(args.home), Path(args.root), args.lang, args.owner, _split_list(args.entities), _split_list(args.addons))
+    return {"ok": True, "home": str(cfg.home), "root": str(cfg.root), "lang": cfg.lang,
+            "tree": [{"num": n["num"], "name": n["name"], "physical": n["physical"]} for n in cfg.tree]}
+
+
+def cmd_adopt(args) -> dict:
+    if not args.home:
+        raise CliError("adopt needs --home DIR (the existing brain folder)")
+    cfg = init.adopt(Path(args.home), Path(args.root))
+    return {"ok": True, "home": str(cfg.home), "root": str(cfg.root), "lang": cfg.lang,
+            "tree": [{"num": n["num"], "name": n["name"], "physical": n["physical"], "handoff": n["handoff"]} for n in cfg.tree],
+            "proposed_tree": str(cfg.path("proposed_tree"))}
+
+
+def cmd_scan(args) -> dict:
+    return {"ok": True, **init.scan(load_cfg(args))}
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
@@ -157,6 +203,10 @@ HANDLERS = {
     "index": cmd_index,
     "namecheck": cmd_namecheck,
     "ledger": cmd_ledger,
+    "doctor": cmd_doctor,
+    "init": cmd_init,
+    "adopt": cmd_adopt,
+    "scan": cmd_scan,
 }
 
 
