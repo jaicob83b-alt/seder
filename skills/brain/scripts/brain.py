@@ -16,7 +16,7 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, sensitive  # noqa: E402
+from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, sensitive  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -102,6 +102,19 @@ def build_parser() -> _Parser:
     papp.add_argument("--folder", action="append", default=[], metavar="N=FOLDER", help="corrected folder for document N")
     papp.add_argument("--mkdir", default="", help="comma-separated document numbers whose new folder was approved")
     papp.add_argument("--proposal", help="path of the proposal file (default: <inbox>/_proposal.json)")
+
+    pproj = sub.add_parser("project", help="project cards: new, list, archive-candidates, archive")
+    jsub = pproj.add_subparsers(dest="sub", metavar="new|list|archive-candidates|archive")
+    jnew = jsub.add_parser("new", help="create a project folder with a card")
+    jnew.add_argument("name")
+    jnew.add_argument("--code", help="where the code lives (path or URL)")
+    jnew.add_argument("--branch", help="dev_projects (07) or projects (06); default: the first present")
+    jsub.add_parser("list", help="projects with created / last modified dates")
+    jcand = jsub.add_parser("archive-candidates", help="projects quiet for more than --days days")
+    jcand.add_argument("--days", type=int, default=90)
+    jcand.add_argument("--today", help="YYYY-MM-DD (default: today)")
+    jarch = jsub.add_parser("archive", help="move a project into the branch's archive folder (after a yes)")
+    jarch.add_argument("name")
     return p
 
 
@@ -232,6 +245,20 @@ def cmd_intake_apply(args) -> dict:
     return {"ok": all(r.get("ok") for r in results), "results": results}
 
 
+def cmd_project(args) -> dict:
+    cfg = load_cfg(args)
+    if args.sub == "new":
+        p = project.new_project(cfg, args.name, args.code, dt.date.today(), args.branch)
+        return {"ok": True, "path": str(p), "card": str(p / project.NAMES.get(cfg.lang, project.NAMES["en"])["card"])}
+    if args.sub == "list":
+        return {"ok": True, "projects": project.list_projects(cfg)}
+    if args.sub == "archive-candidates":
+        return {"ok": True, "candidates": project.archive_candidates(cfg, _today(args.today), args.days)}
+    if args.sub == "archive":
+        return {"ok": True, "dest": str(project.archive(cfg, args.name))}
+    raise CliError("project: new | list | archive-candidates | archive")
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
@@ -246,6 +273,7 @@ HANDLERS = {
     "scan": cmd_scan,
     "inbox": cmd_inbox,
     "intake-apply": cmd_intake_apply,
+    "project": cmd_project,
 }
 
 
