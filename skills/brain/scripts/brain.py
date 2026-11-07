@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import seder  # noqa: E402
-from seder import config, emit, sensitive  # noqa: E402
+from seder import config, emit, filing, index, pdf, sensitive  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -39,6 +39,28 @@ def build_parser() -> _Parser:
     pset = psub.add_parser("set", help="set a folder's level")
     pset.add_argument("folder")
     pset.add_argument("level", choices=sensitive.LEVELS)
+
+    ppdf = sub.add_parser("pdf", help="join images/PDFs into one PDF: pdf OUT PAGE... [--rotate 0,90,...]")
+    ppdf.add_argument("out")
+    ppdf.add_argument("pages", nargs="+")
+    ppdf.add_argument("--rotate", default="", help="comma-separated clockwise degrees per page")
+
+    pfile = sub.add_parser("file", help="move an approved document: file SRC FOLDER NAME --why TEXT")
+    pfile.add_argument("src")
+    pfile.add_argument("folder")
+    pfile.add_argument("name")
+    pfile.add_argument("--why", default="")
+    pfile.add_argument("--mkdir", action="store_true", help="create the (approved) new folder")
+    pfile.add_argument("--original", help="original file (xlsx/docx) for a hand-off branch")
+
+    pidx = sub.add_parser("index", help="index: count rows, --rebuild, or --update REL")
+    pidx.add_argument("--rebuild", action="store_true")
+    pidx.add_argument("--update", metavar="REL")
+
+    pnc = sub.add_parser("namecheck", help="is FOLDER/NAME taken, same as --src, and which name is free")
+    pnc.add_argument("folder")
+    pnc.add_argument("name")
+    pnc.add_argument("--src")
     return p
 
 
@@ -62,9 +84,41 @@ def cmd_privacy(args) -> dict:
             "medical_folders": g.get("medical_folders") or [], "secret_folders": g.get("secret_folders") or []}
 
 
+def cmd_pdf(args) -> dict:
+    rotations = [int(x) for x in args.rotate.split(",") if x.strip()] if args.rotate else []
+    n = pdf.build_pdf([Path(p) for p in args.pages], rotations, Path(args.out))
+    return {"ok": True, "out": str(Path(args.out)), "pages": n}
+
+
+def cmd_file(args) -> dict:
+    cfg = load_cfg(args)
+    r = filing.file_doc(cfg, Path(args.src), args.folder, args.name, args.why,
+                        mkdir=args.mkdir, original=Path(args.original) if args.original else None)
+    return {"ok": True, **r}
+
+
+def cmd_index(args) -> dict:
+    cfg = load_cfg(args)
+    if args.rebuild:
+        return {"ok": True, "rows": index.rebuild(cfg)}
+    if args.update:
+        index.update_row(cfg, args.update)
+        return {"ok": True, "updated": args.update}
+    return {"ok": True, "rows": len(index.rows(cfg))}
+
+
+def cmd_namecheck(args) -> dict:
+    cfg = load_cfg(args)
+    return {"ok": True, **filing.namecheck(cfg, args.folder, args.name, Path(args.src) if args.src else None)}
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
+    "pdf": cmd_pdf,
+    "file": cmd_file,
+    "index": cmd_index,
+    "namecheck": cmd_namecheck,
 }
 
 
