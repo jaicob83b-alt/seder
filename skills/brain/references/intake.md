@@ -5,6 +5,10 @@ the inbox, "תייק", "מה הגיע", "file this", "sort these".
 
 ## The flow
 
+0. **Mark the conversation.** Your first message of an intake contains the line
+   `SEDER_INTAKE` on its own (a small print line is fine). It is how
+   `brain.py prune-transcripts` later recognises transcripts that hold document
+   content, so the person can move them off the disk.
 1. **Stage the files in the inbox.** The inbox is `<home>/_נכנס` (Hebrew) or
    `<home>/_inbox` (English); `brain.json` has `lang`. Files already there are ready.
    Photos the person sent to the chat live in the conversation's uploads folder:

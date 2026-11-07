@@ -19,6 +19,7 @@ FILES = {
         "proposed_tree": "עץ_מוצע.md",
         "studies_index": "אינדקס_לימודים.md",
         "review": "סקירה_שבועית.html",
+        "transcripts": "_ארכיון_תמלילים",
     },
     "en": {
         "index": "index.csv",
@@ -31,6 +32,7 @@ FILES = {
         "proposed_tree": "proposed_tree.md",
         "studies_index": "studies_index.md",
         "review": "weekly_review.html",
+        "transcripts": "_transcripts_archive",
     },
 }
 

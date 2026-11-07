@@ -16,7 +16,7 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, sensitive, studies  # noqa: E402
+from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, prune, sensitive, studies  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -127,6 +127,18 @@ def build_parser() -> _Parser:
     srel = ssub.add_parser("relevant", help="lessons related to a text, best first")
     srel.add_argument("query")
     srel.add_argument("--limit", type=int, default=5)
+
+    ppr = sub.add_parser("prune-transcripts", help="list (or with --go move) old intake transcripts out of ~/.claude/projects")
+    ppr.add_argument("--older-days", type=int, default=7)
+    ppr.add_argument("--projects", help="the Claude Code projects folder (default: ~/.claude/projects)")
+    ppr.add_argument("--go", action="store_true", help="move them into <home>/<transcripts archive>; nothing is deleted")
+
+    pset2 = sub.add_parser("settings", help="write the permission settings for unattended runs: settings --headless OUT")
+    pset2.add_argument("--headless", metavar="OUT", required=True)
+
+    pptr = sub.add_parser("pointer", help="the ~/.seder/home pointer the hook uses to find the instance")
+    pptr.add_argument("--write", action="store_true", help="write the current instance's path into it")
+    pptr.add_argument("--file", help="pointer file (default: ~/.seder/home)")
     return p
 
 
@@ -285,6 +297,37 @@ def cmd_studies(args) -> dict:
     raise CliError("studies: import | index | relevant")
 
 
+def cmd_prune(args) -> dict:
+    cfg = load_cfg(args)
+    projects = Path(args.projects) if args.projects else prune.default_projects_dir()
+    dest = cfg.path("transcripts")
+    items = prune.scan(projects, args.older_days)
+    out = {"ok": True, "go": bool(args.go), "projects": str(projects), "dest": str(dest), "transcripts": items}
+    if args.go:
+        out["moved"] = prune.move(items, dest)
+    return out
+
+
+def cmd_settings(args) -> dict:
+    cfg = load_cfg(args)
+    out = sensitive.write_headless_settings(cfg, Path(args.headless))
+    data = json.loads(out.read_text(encoding="utf-8"))
+    return {"ok": True, "file": str(out), "allow": data["permissions"]["allow"], "deny": len(data["permissions"]["deny"])}
+
+
+def cmd_pointer(args) -> dict:
+    pointer = Path(args.file) if args.file else config.HOME_POINTER
+    if args.write:
+        cfg = load_cfg(args)
+        pointer.parent.mkdir(parents=True, exist_ok=True)
+        pointer.write_text(str(cfg.home) + "\n", encoding="utf-8")
+    current = None
+    if pointer.is_file():
+        line = pointer.read_text(encoding="utf-8").strip().splitlines()
+        current = line[0].strip() if line else None
+    return {"ok": True, "file": str(pointer), "home": current}
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
@@ -301,6 +344,9 @@ HANDLERS = {
     "intake-apply": cmd_intake_apply,
     "project": cmd_project,
     "studies": cmd_studies,
+    "prune-transcripts": cmd_prune,
+    "settings": cmd_settings,
+    "pointer": cmd_pointer,
 }
 
 

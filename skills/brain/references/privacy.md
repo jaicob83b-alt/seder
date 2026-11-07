@@ -57,8 +57,22 @@ conversation also passes through Anthropic's servers so the phone can show it.
 
 Recommend, do not nag: the person chose Remote Control for a reason. Two more things
 worth saying when privacy comes up: the account's privacy settings have a switch for
-whether conversations may be used to improve Claude, and `brain.py prune-transcripts`
-(see `scripts`) removes old intake transcripts from the disk with the person's approval.
+whether conversations may be used to improve Claude, and old intake transcripts can be
+moved off the active folder:
+
+```
+brain.py prune-transcripts --older-days 7          # list intake transcripts older than a week
+brain.py prune-transcripts --older-days 7 --go     # move them to <home>/_ארכיון_תמלילים (nothing deleted)
+```
+
+The script recognises an intake transcript by the marker `SEDER_INTAKE` or by the
+proposal file name, which is why every intake starts with the marker line (see
+`intake.md`). Run `--go` only after the person said yes to the listed files.
+
+```
+brain.py pointer --write      # ~/.seder/home, so the hook finds the instance from any folder
+brain.py settings --headless <file>   # the deny/allow settings for unattended runs
+```
 
 ## Unattended runs
 
