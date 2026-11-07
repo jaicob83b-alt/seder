@@ -73,7 +73,7 @@ unattended runs. No secrets in the repository, by test. The full page:
 | 00 | Brain | the system: settings, naming, index, ledger, log, inbox |
 | 01 | Finance | bank · credit cards · loans and mortgage · savings and pension · tax · income |
 | 02 | Home | one folder per property |
-| 03 | Family | one folder per person; Health asks before opening |
+| 03 | Family | one folder per person; Health is locked (names only) |
 | 04 | Vehicles | one folder per vehicle |
 | 05 | Business | one folder per business |
 | 06 | Projects and events | one folder per project with a card |

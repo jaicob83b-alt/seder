@@ -25,11 +25,12 @@ processed by the model. This page says exactly when that happens, and what stops
   filed under a template name (`2026-09_רפואי - דנה.pdf`) that a local script builds
   from the file's own text or date; you confirm the name, nobody reads the content.
 
-Defaults for a new archive: everything open, every Health (`בריאות`) folder on ask.
+Defaults for a new archive: everything open, every Health (`בריאות` / `Health` / `רפואי` / `Medical`) folder locked.
+Prefer a question instead of a lock for one folder? Set it to `ask`.
 
 ```
 brain.py privacy list
-brain.py privacy set "03_משפחה/דנה/בריאות" locked
+brain.py privacy set "03_משפחה/דנה/בריאות" ask
 ```
 
 ## How it is enforced (not promised)

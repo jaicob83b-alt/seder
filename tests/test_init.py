@@ -36,7 +36,7 @@ def test_create_makes_skeleton_without_tree_dirs(tmp_path):
     assert cfg.tree[0]["physical"] == "00_המוח" and cfg.owner == "דנה" and cfg.entities == ["דנה", "יוסי"]
     assert cfg.root == root and cfg.sources["inbox"] is True
     g = json.loads(cfg.path("sensitive").read_text(encoding="utf-8"))
-    assert g["folder_names"]["בריאות"] == "ask" and g["levels"] == {}
+    assert g["folder_names"]["בריאות"] == "locked" and g["levels"] == {}
 
 
 def test_create_refuses_existing_instance(tmp_path):
@@ -105,8 +105,8 @@ def test_adopt_marks_medical_named_folders_not_yet_covered(tmp_path):
     (home / "רגיש.json").write_text("{}", encoding="utf-8")  # nothing listed yet
     cfg = init.adopt(home, root)
     g = json.loads((home / "רגיש.json").read_text(encoding="utf-8"))
-    assert g["levels"] == {"09_אישי/רפואי_דנה": "ask"}
-    assert sensitive.level(cfg, "09_אישי/רפואי_דנה/x.pdf") == "ask"
+    assert g["levels"] == {"09_אישי/רפואי_דנה": "locked"}
+    assert sensitive.level(cfg, "09_אישי/רפואי_דנה/x.pdf") == "locked"
 
 
 def test_adopt_with_addons_appends_new_branches(tmp_path):

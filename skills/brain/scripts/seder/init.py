@@ -230,7 +230,7 @@ def _mark_medical_named_folders(cfg: Config) -> None:
             if any(w in name for w in words):
                 rel = (d / name).relative_to(root).as_posix()
                 if sensitive.level(cfg, rel) == "open":
-                    sensitive.set_level(cfg, rel, "ask")
+                    sensitive.set_level(cfg, rel, "locked")
 
 
 def scan(cfg: Config) -> dict:

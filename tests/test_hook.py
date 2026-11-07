@@ -25,6 +25,8 @@ def test_hooks_json_points_at_the_hook():
 
 
 def test_asks_on_sensitive_read(home):
+    from seder import config, sensitive
+    sensitive.set_level(config.Config.load(home), "03_משפחה/דנה/בריאות", "ask")
     p = str(home.parent / "03_משפחה" / "דנה" / "בריאות" / "a.pdf")
     r = run_hook(json.dumps({"tool_name": "Read", "tool_input": {"file_path": p}}), home)
     out = decision(r)
@@ -50,18 +52,20 @@ def test_silent_without_instance(tmp_path):
 
 
 def test_asks_on_glob_into_sensitive(home):
+    from seder import config, sensitive
+    sensitive.set_level(config.Config.load(home), "03_משפחה/דנה/בריאות", "ask")
     r = run_hook(json.dumps({"tool_name": "Glob", "tool_input": {"pattern": "**/*.pdf", "path": str(home.parent / "03_משפחה" / "דנה" / "בריאות")}}), home)
     assert decision(r)["permissionDecision"] == "ask"
 
 
 def test_asks_on_grep_into_sensitive(home):
+    from seder import config, sensitive
+    sensitive.set_level(config.Config.load(home), "03_משפחה/דנה/בריאות", "ask")
     r = run_hook(json.dumps({"tool_name": "Grep", "tool_input": {"pattern": "x", "path": str(home.parent / "03_משפחה" / "דנה" / "בריאות")}}), home)
     assert decision(r)["permissionDecision"] == "ask"
 
 
-def test_denies_on_locked_read(home):
-    from seder import config, sensitive
-    sensitive.set_level(config.Config.load(home), "03_משפחה/דנה/בריאות", "locked")
+def test_denies_on_health_by_default(home):
     p = str(home.parent / "03_משפחה" / "דנה" / "בריאות" / "a.pdf")
     out = decision(run_hook(json.dumps({"tool_name": "Read", "tool_input": {"file_path": p}}), home))
     assert out["permissionDecision"] == "deny" and "privacy set" in out["permissionDecisionReason"]
@@ -74,6 +78,8 @@ def test_denies_secret_file(home):
 
 
 def test_english_reason(home_en):
+    from seder import config, sensitive
+    sensitive.set_level(config.Config.load(home_en), "03_Family/Dana/Health", "ask")
     p = str(home_en.parent / "03_Family" / "Dana" / "Health" / "a.pdf")
     out = decision(run_hook(json.dumps({"tool_name": "Read", "tool_input": {"file_path": p}}), home_en))
     assert out["permissionDecision"] == "ask" and out["permissionDecisionReason"].startswith("This file")

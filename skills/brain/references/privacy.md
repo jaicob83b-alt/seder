@@ -14,12 +14,12 @@ Read this when the person asks what Claude sees, wants to lock a folder, or when
 Secret files (`.env`, keys, passwords, tokens) are always denied.
 
 Defaults for a new instance: everything open, every `בריאות` / `Health` /
-`רפואי` / `Medical` folder on `ask`. The levels live in the instance's
+`רפואי` / `Medical` folder `locked` (names only). The person may relax a folder to `ask`. The levels live in the instance's
 `רגיש.json` / `sensitive.json`:
 
 ```
 brain.py privacy list
-brain.py privacy set "03_משפחה/דנה/בריאות" locked
+brain.py privacy set "03_משפחה/דנה/בריאות" ask
 brain.py privacy set "03_משפחה/דנה/בריאות" open
 ```
 

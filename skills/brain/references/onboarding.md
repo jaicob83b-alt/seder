@@ -32,7 +32,7 @@ say the Remote Control sentence from `privacy.md` once.
 5. **Add-ons?** Offer only what fits what they said: dev projects (07), studies (08),
    pets, media, community, military, immigration.
 6. **Privacy.** "אילו תיקיות ישאלו לפני פתיחה, ואילו נעולות? ברירת המחדל: הכל פתוח,
-   ותיקיות בריאות שואלות." Apply the answer with `brain.py privacy set`.
+   ותיקיות בריאות נעולות. רוצה שאלה במקום נעילה באחת מהן?" Apply the answer with `brain.py privacy set`.
 7. **Sources.** The checklist from `sources.md`. Record the yes/no flags in `brain.json`.
 
 ## 4. Create or adopt

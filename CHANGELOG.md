@@ -13,5 +13,7 @@ First release, built for lesson 15 of the AI Dev course.
 - Privacy: three levels per folder (open / ask / locked), a PreToolUse hook, secret
   patterns, quarantine for medical-looking files, headless deny settings, transcript
   pruning, the privacy page.
+- Health-named folders (`בריאות` / `Health` / `רפואי` / `Medical`) are locked by default;
+  `ask` is an explicit choice per folder.
 - Hebrew and English: file names, CSV headers, templates and messages per instance language.
 - An existing archive is adopted as it is; the standard tree is proposed, never applied.

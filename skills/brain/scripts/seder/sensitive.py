@@ -65,34 +65,45 @@ def _under(rel: str, folder: str) -> bool:
 
 
 def level(cfg: Config, rel: str) -> str:
-    """Highest level that applies to the path: locked > ask > open."""
+    """The level that applies to the path.
+
+    The most specific rule wins: a rule on a deeper folder beats one on a
+    shallower folder, and at the same depth an explicit `levels` entry beats a
+    folder-name default, which beats the branch privacy in the tree. So
+    `privacy set 03_משפחה/דנה/בריאות ask` relaxes the health lock, while a
+    health folder inside a branch set to `ask` stays locked. The older lists
+    (`medical_folders` = ask, `secret_folders` = locked) only raise the result.
+    """
     g = load(cfg)
     r = _rel(cfg, rel)
     segs = [s for s in r.split("/") if s]
-    best = "open"
+    rules = []  # (depth, priority, level)
+    for folder, lv in (g.get("levels") or {}).items():
+        f = _norm(folder)
+        if _under(r, f) and lv in RANK:
+            rules.append((f.count("/") + 1, 2, lv))
+    fn = g.get("folder_names") or {}
+    for i, seg in enumerate(segs):
+        if fn.get(seg) in RANK:
+            rules.append((i + 1, 1, fn[seg]))
+    if segs:
+        from . import tree  # local import: tree depends on config only
+        node = tree.find_node(cfg, segs[0])
+        if node and node.get("privacy") in RANK:
+            rules.append((1, 0, node["privacy"]))
+    best = max(rules)[2] if rules else "open"
 
     def bump(lv):
         nonlocal best
-        if lv in RANK and RANK[lv] > RANK[best]:
+        if RANK[lv] > RANK[best]:
             best = lv
 
-    for folder, lv in (g.get("levels") or {}).items():
-        if _under(r, folder):
-            bump(lv)
     for folder in g.get("medical_folders") or []:
         if _under(r, folder):
             bump("ask")
     for folder in g.get("secret_folders") or []:
         if _under(r, folder):
             bump("locked")
-    fn = g.get("folder_names") or {}
-    for seg in segs:
-        bump(fn.get(seg, "open"))
-    if segs:
-        from . import tree  # local import: tree depends on config only
-        node = tree.find_node(cfg, segs[0])
-        if node:
-            bump(node.get("privacy", "open"))
     return best
 
 
