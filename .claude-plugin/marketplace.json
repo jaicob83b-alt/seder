@@ -1,0 +1,18 @@
+{
+  "name": "seder",
+  "owner": {
+    "name": "jaicob83b",
+    "url": "https://github.com/jaicob83b"
+  },
+  "description": "Seder: a private, approval-first document archive for Claude Code.",
+  "plugins": [
+    {
+      "name": "seder",
+      "source": "./",
+      "description": "A private document archive on your own disk: standard tree, approval-first filing, per-folder privacy levels, project cards, weekly review.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": ["documents", "archive", "privacy", "hebrew"]
+    }
+  ]
+}
