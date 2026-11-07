@@ -16,7 +16,7 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, sensitive  # noqa: E402
+from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, sensitive, studies  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -115,6 +115,18 @@ def build_parser() -> _Parser:
     jcand.add_argument("--today", help="YYYY-MM-DD (default: today)")
     jarch = jsub.add_parser("archive", help="move a project into the branch's archive folder (after a yes)")
     jarch.add_argument("name")
+
+    pst = sub.add_parser("studies", help="add-on 08: import a course (copy), index lessons, find relevant lessons")
+    ssub = pst.add_subparsers(dest="sub", metavar="import|index|relevant")
+    simp = ssub.add_parser("import", help="copy a course folder into 08 with topic names; dry run unless --go")
+    simp.add_argument("--src", required=True, help="the course folder to copy from")
+    simp.add_argument("--course", required=True, help="course name inside 08")
+    simp.add_argument("--rename", help="JSON file: {\"old folder name\": \"new name\", ...}")
+    simp.add_argument("--go", action="store_true", help="actually copy (default: list the plan only)")
+    ssub.add_parser("index", help="rebuild the studies index")
+    srel = ssub.add_parser("relevant", help="lessons related to a text, best first")
+    srel.add_argument("query")
+    srel.add_argument("--limit", type=int, default=5)
     return p
 
 
@@ -259,6 +271,20 @@ def cmd_project(args) -> dict:
     raise CliError("project: new | list | archive-candidates | archive")
 
 
+def cmd_studies(args) -> dict:
+    cfg = load_cfg(args)
+    if args.sub == "import":
+        rename = json.loads(Path(args.rename).read_text(encoding="utf-8")) if args.rename else {}
+        plan = studies.import_course(cfg, Path(args.src), args.course, rename, dry_run=not args.go)
+        return {"ok": True, "dry_run": not args.go, "plan": plan}
+    if args.sub == "index":
+        out = studies.build_index(cfg)
+        return {"ok": True, "file": str(out), "lessons": len(studies.index_rows(cfg))}
+    if args.sub == "relevant":
+        return {"ok": True, "lessons": studies.relevant(cfg, args.query, args.limit)}
+    raise CliError("studies: import | index | relevant")
+
+
 HANDLERS = {
     "version": cmd_version,
     "privacy": cmd_privacy,
@@ -274,6 +300,7 @@ HANDLERS = {
     "inbox": cmd_inbox,
     "intake-apply": cmd_intake_apply,
     "project": cmd_project,
+    "studies": cmd_studies,
 }
 
 
