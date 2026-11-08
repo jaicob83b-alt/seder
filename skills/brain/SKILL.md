@@ -1,7 +1,7 @@
 ---
 name: brain
 description: Seder, a private document archive on the person's own disk. A standard folder tree, approval-first filing of documents from an inbox or from photos sent to the chat, finding documents by name, project cards, and per-folder privacy levels. Use this skill whenever the user wants to file, sort, name, archive or find personal or household documents (bills, payslips, contracts, letters, scans, PDFs, photos of paperwork), set up or adopt a document archive, open a project card, or asks what their archive sends to Anthropic, even when they never say "Seder". Hebrew triggers - תייק, תסדר את המסמכים, איפה החשבון, הארון, קליטה, מה הגיע, כרטיס פרויקט, תפתח פרויקט, המוח. English triggers - file this, sort my documents, where is the electricity bill, what arrived, set up my archive, new project card.
-allowed-tools: Read, Glob, Grep, Bash(python *)
+allowed-tools: Read, Glob, Grep
 ---
 
 # Seder: the `brain` skill

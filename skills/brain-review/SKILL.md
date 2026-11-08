@@ -1,7 +1,7 @@
 ---
 name: brain-review
 description: The weekly review of a Seder document archive, as a page the person opens - what came in this week, what waits in the inbox, which recurring documents (bills, payslips, statements) are missing a period, which actions are open and overdue, and which projects went quiet. Use this skill when the user asks for a review, a summary of their archive, what they are missing, what is open or overdue, or what arrived this week, and right after the brain skill filed documents when they asked to "file and then review". Hebrew triggers - סקירה שבועית, מה חסר לי, מה פתוח, מה נכנס השבוע, תן לי סקירה. English triggers - weekly review, what am I missing, what is open, what arrived this week, review my archive.
-allowed-tools: Read, Bash(python *)
+allowed-tools: Read
 ---
 
 # Seder: the `brain-review` skill
