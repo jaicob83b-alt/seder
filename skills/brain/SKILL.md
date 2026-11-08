@@ -46,7 +46,7 @@ when installed as a plugin). Every command prints exactly one JSON line:
 | to find a document, "איפה החשבון", "where is" | `references/naming.md` (retrieval section) | names first, content only with consent |
 | a new archive, or to register an existing folder | `references/onboarding.md` | doctor, name, discover, interview, tree-preview, init or adopt |
 | a project card, "תפתח פרויקט", "new project" | `references/project.md` | `brain.py project new` |
-| to connect Gmail, WhatsApp, the phone | `references/sources.md` | explain what each sends, enable with consent |
+| to use the phone, connect WhatsApp or Downloads | `references/sources.md` | Tailscale and the site, Syncthing, watched folders; each after a yes |
 | to know what leaves the computer, lock a folder | `references/privacy.md` | `brain.py privacy` |
 | a weekly review, "מה חסר לי", "what am I missing" | the `brain-review` skill | run it after intake when asked "קלוט ואז סקירה" |
 | the standard tree, where a kind of document goes | `references/tree-default.md` | the document goes to the thing it is about |
@@ -61,6 +61,8 @@ when installed as a plugin). Every command prints exactly one JSON line:
 | `brain.py discover [--roots DIR...]` | before an archive exists, after a yes: where documents live and which topics, counts and folder names only |
 | `brain.py tree-preview --plan FILE` | the tailored tree init would create; writes nothing |
 | `brain.py rename NAME [--folder]` | the archive's own name; `--folder` also renames the brain folder |
+| `brain.py site [--check] [--autostart install\|remove\|status]` | the phone site on the Tailscale address (or 127.0.0.1): approve, snap, search, review |
+| `brain.py sources list\|add PATH --label L\|remove PATH` and `brain.py pull` | watched folders (PC Downloads, Syncthing folders from the phone) copied into the inbox |
 | `brain.py scan` | folders to depth 2 with counts, names only |
 | `brain.py inbox` | what is waiting: size, hash, duplicates, quarantine, suggested names |
 | `brain.py intake-apply --approve 1,3 --name 2=NAME --folder 3=FOLDER --mkdir 3` | file the approved rows of `_proposal.json` |

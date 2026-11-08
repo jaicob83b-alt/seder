@@ -66,6 +66,33 @@ def test_mkdir_requires_flag_and_parent(home):
     assert (cfg.root / "01_כספים" / "חדש" / "x.pdf").exists()
 
 
+def test_first_document_creates_a_missing_branch_folder_once_approved(home):
+    cfg = config.Config.load(home)
+    src = make_pdf(home / "_נכנס" / "04.pdf", "c")
+    import shutil
+    shutil.rmtree(cfg.root / "02_בית")
+    with pytest.raises(ValueError):
+        filing.file_doc(cfg, src, "02_בית/חשבונות שוטפים", "x.pdf", "t")
+    assert not (cfg.root / "02_בית").exists()
+    filing.file_doc(cfg, src, "02_בית/חשבונות שוטפים", "x.pdf", "t", mkdir=True)
+    assert (cfg.root / "02_בית" / "חשבונות שוטפים" / "x.pdf").is_file()
+
+
+def test_per_item_branch_creates_item_and_subfolder_once_approved(home):
+    cfg = config.Config.load(home)
+    cfg.tree.append({"id": "vehicles", "num": "04", "name": "רכב", "physical": "04_רכב", "privacy": "open",
+                     "handoff": None, "subfolders": ["ביטוח"], "per_item": True})
+    cfg.save()
+    cfg = config.Config.load(home)
+    src = make_pdf(home / "_נכנס" / "06.pdf", "c")
+    filing.file_doc(cfg, src, "04_רכב/ימאהה/ביטוח", "x.pdf", "t", mkdir=True)
+    assert (cfg.root / "04_רכב" / "ימאהה" / "ביטוח" / "x.pdf").is_file()
+    src = make_pdf(home / "_נכנס" / "07.pdf", "c")
+    with pytest.raises(ValueError):  # three new levels is still too many
+        filing.file_doc(cfg, src, "04_רכב/הונדה/ביטוח/2026", "y.pdf", "t", mkdir=True)
+    assert not (cfg.root / "04_רכב" / "הונדה").exists()
+
+
 def test_file_doc_rejects_brain_folder_and_bad_name(home):
     cfg = config.Config.load(home)
     src = make_pdf(home / "_נכנס" / "05.pdf", "c")

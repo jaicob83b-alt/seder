@@ -83,6 +83,17 @@ def file_doc(cfg: Config, src: Path, folder: str, name: str, why: str,
     if not target_dir.is_dir():
         if not mkdir:
             raise ValueError(f"folder does not exist (a new folder needs approval and mkdir): {target_dir}")
+        head = tree.normalize(folder).split("/")[0]
+        branch_dir = tree.resolve(cfg, head)
+        node = tree.find_node(cfg, head) or {}
+        # one new level per approval, plus the branch folder itself (part of the approved tree)
+        # and, for a per-item branch (a car, a person, a property), the item folder above its subfolder
+        allowed = [branch_dir]
+        if node.get("per_item") and target_dir.parent.parent == branch_dir:
+            allowed.append(target_dir.parent)
+        for d in allowed:
+            if target_dir.parent.is_relative_to(d) and not d.is_dir() and d.parent.is_dir():
+                d.mkdir()
         if not target_dir.parent.is_dir():
             raise ValueError(f"parent folder does not exist: {target_dir.parent}")
         target_dir.mkdir()

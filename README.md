@@ -39,6 +39,17 @@ The first meeting:
 
 A folder you already keep in order is adopted as it is, without moving a file.
 
+## From the phone
+
+**"Connect my phone"**: Tailscale on the computer and the phone (a private network of
+your own devices), then `brain.py site`. The phone opens a page named after your
+archive: approve or reject each proposed document, **photograph a document straight
+into the inbox**, search by name, and the weekly review. The site listens only on the
+Tailscale address, never on Wi-Fi or the internet, and never calls a model.
+
+Documents from WhatsApp and the phone's Downloads arrive by themselves through
+Syncthing (copied phone to computer); the PC's Downloads through `brain.py sources add`.
+
 Requirements: Python 3.11+, `pymupdf`, `Pillow`, `openpyxl`
 (`python -m pip install pymupdf Pillow openpyxl`), Claude Code.
 

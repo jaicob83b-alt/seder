@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0 - 2026-11-08
+
+- The phone site (`brain.py site`): approve, edit or reject proposed documents with a
+  thumbnail, photograph a document straight into the inbox, search by name, open a
+  filed document, the weekly review. Listens only on the Tailscale address or
+  127.0.0.1, answers only tailnet or local clients, checks Host and Origin, needs a
+  custom header for every change; never calls a model. `--check` reports Tailscale and
+  the address to open; `--autostart install|remove|status` starts it with Windows.
+- Watched folders (`brain.py sources`, `brain.py pull`): new documents in the PC's
+  Downloads or in Syncthing folders from the phone (Downloads, WhatsApp Documents) are
+  copied into the inbox once, never moved; the site pulls every minute.
+- Filing: an approved new folder may also create its missing branch folder and, in a
+  per-item branch, the item folder (a new archive's first document no longer fails).
+- sources.md: step-by-step Tailscale and Syncthing setup; privacy.md: what the site sends.
+
 ## 0.2.0 - 2026-11-08 (first outside tester)
 
 - Onboarding v2: the person names the archive (`init --name`, `adopt --name`,

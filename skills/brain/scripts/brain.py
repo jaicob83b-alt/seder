@@ -16,7 +16,7 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import tree  # noqa: E402
+from seder import pull, site, tree  # noqa: E402
 from seder import config, discover, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, prune, sensitive, studies  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
@@ -106,6 +106,23 @@ def build_parser() -> _Parser:
     pprev.add_argument("--lang", default="he", choices=list(names.LANGS))
     pprev.add_argument("--addons", default="")
     pprev.add_argument("--plan", help="JSON file with the tailored tree")
+
+    psite = sub.add_parser("site", help="the phone site: approve, snap a photo, search; listens on Tailscale or 127.0.0.1 only")
+    psite.add_argument("--port", type=int, default=site.DEFAULT_PORT)
+    psite.add_argument("--bind", help="100.x (Tailscale) or 127.0.0.1; default: the Tailscale address, else 127.0.0.1")
+    psite.add_argument("--check", action="store_true", help="is Tailscale up, which address to open on the phone; starts nothing")
+    psite.add_argument("--wait-tailscale", type=int, default=0, help="seconds to wait for Tailscale at startup")
+    psite.add_argument("--autostart", choices=["install", "remove", "status"], help="start the site with Windows (after a yes)")
+
+    sub.add_parser("pull", help="copy new documents from the watched folders into the inbox")
+    psrc = sub.add_parser("sources", help="watched folders: list, add PATH --label L, remove PATH")
+    srcsub = psrc.add_subparsers(dest="src_cmd", metavar="action")
+    srcsub.add_parser("list")
+    sadd = srcsub.add_parser("add")
+    sadd.add_argument("path")
+    sadd.add_argument("--label", default="")
+    srem = srcsub.add_parser("remove")
+    srem.add_argument("path")
 
     pren = sub.add_parser("rename", help="change the archive's name; --folder also renames the brain folder")
     pren.add_argument("name")
@@ -281,6 +298,29 @@ def cmd_tree_preview(args) -> dict:
                                   "per_item": n.get("per_item", False)} for n in branches]}
 
 
+def cmd_site(args) -> dict:
+    if args.check:
+        return {"ok": True, **site.check(args.port)}
+    cfg = load_cfg(args)
+    if args.autostart:
+        return {"ok": True, **site.autostart(cfg, args.autostart, Path(__file__).resolve(), sys.executable)}
+    site.serve(cfg, bind=args.bind, port=args.port, wait_for_tailscale=args.wait_tailscale)
+    return {"ok": True, "stopped": True}
+
+
+def cmd_pull(args) -> dict:
+    return {"ok": True, **pull.pull(load_cfg(args))}
+
+
+def cmd_sources(args) -> dict:
+    cfg = load_cfg(args)
+    if args.src_cmd == "add":
+        return {"ok": True, "added": pull.add(cfg, Path(args.path), args.label)}
+    if args.src_cmd == "remove":
+        return {"ok": True, "removed": pull.remove(cfg, Path(args.path))}
+    return {"ok": True, **pull.status(cfg)}
+
+
 def cmd_rename(args) -> dict:
     return {"ok": True, **init.rename(load_cfg(args), args.name, move_folder=args.folder)}
 
@@ -391,6 +431,9 @@ HANDLERS = {
     "discover": cmd_discover,
     "tree-preview": cmd_tree_preview,
     "rename": cmd_rename,
+    "site": cmd_site,
+    "pull": cmd_pull,
+    "sources": cmd_sources,
     "inbox": cmd_inbox,
     "intake-apply": cmd_intake_apply,
     "project": cmd_project,

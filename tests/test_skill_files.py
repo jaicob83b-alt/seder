@@ -50,11 +50,11 @@ def test_brain_references_present():
 def test_brain_skill_points_at_every_cli_command_it_needs():
     _, body = frontmatter("brain")
     refs = " ".join((SK / "brain" / "references" / f).read_text(encoding="utf-8") for f in
-                    ("intake.md", "onboarding.md", "naming.md", "project.md", "privacy.md"))
+                    ("intake.md", "onboarding.md", "naming.md", "project.md", "privacy.md", "sources.md"))
     text = body + refs
     for cmd in ("brain.py doctor", "brain.py init", "brain.py adopt", "brain.py inbox", "brain.py intake-apply",
                 "brain.py namecheck", "brain.py privacy", "brain.py ledger", "brain.py project",
-                "brain.py discover", "brain.py tree-preview", "brain.py rename"):
+                "brain.py discover", "brain.py tree-preview", "brain.py rename", "brain.py site", "brain.py pull"):
         assert cmd in text, cmd
 
 

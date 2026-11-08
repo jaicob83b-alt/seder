@@ -92,7 +92,8 @@ From the topic answers, fill the plan:
 
 Privacy, once, when health documents came up or at the end: "תיקיות בריאות נעולות
 (רק שמות). להשאיר נעול, או שאלה לפני כל פתיחה?" Sources, once: the checklist from
-`sources.md`; record the yes/no flags in `brain.json`.
+`sources.md`. Ask "רוצה לאשר מסמכים ולצלם אותם מהטלפון?" and, on yes, set up
+the phone site after the archive exists (step 9), following `sources.md`.
 
 ## 6. The tailored tree
 
@@ -145,4 +146,8 @@ protects only conversations that run inside the root.
 - The documents the scan found stay where they are. Offer the next step in plain
   words: "רוצה שנתחיל מההורדות? תעביר לתיקיית _נכנס את מה שרלוונטי, או שאציע רשימה."
   Anything that moves goes through the inbox, a proposal and a yes.
-- End with: "שלח לי צילום של מסמך, ואני אציע שם ותיקייה."
+- If the person wanted the phone: Tailscale, then `brain.py site`, then the address on
+  the phone and "Add to home screen" (`sources.md`). Offer the PC Downloads folder as a
+  watched folder (`brain.py sources add`), and Syncthing for phone Downloads and WhatsApp
+  as a later, optional step.
+- End with: "שלח לי צילום של מסמך, ואני אציע שם ותיקייה." (or: "צלם מסמך מהאתר בטלפון")

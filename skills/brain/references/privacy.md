@@ -42,6 +42,15 @@ a database of its own.
 | a folder at `ask` | content only after a yes, per file |
 | a folder at `locked` | never content; the template name is made locally |
 | storage in the cloud | none beyond the conversation itself |
+| first look (`discover`) | counts and folder names only; never a file name, never content |
+| phone site | nothing to Anthropic: the site never calls a model. The page and the files travel phone to computer over Tailscale, encrypted end to end; Tailscale's servers only help the two devices find each other |
+| watched folders, Syncthing | nothing: files are copied device to device or folder to folder |
+
+The phone site shows the person their own documents, including files in `locked`
+folders: the privacy levels are about what the model reads, not about the owner.
+Anyone who can open the site can see the archive, which is why it listens only on
+the Tailscale address and answers only devices on the person's own tailnet. If they
+share their tailnet with someone (a family plan), say so before they turn it on.
 
 ## Transcripts and Remote Control
 

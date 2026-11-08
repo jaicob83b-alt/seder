@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<title>סדר</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%231f3a5f%22/%3E%3Cpath d=%22M16 20h32M16 32h32M16 44h20%22 stroke=%22white%22 stroke-width=%226%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#e3e1dc;--brand:#1f3a5f;--ok:#1d7a46;--no:#b3261e;--warn:#9a6700;--chip:#eef1f6}
+@media (prefers-color-scheme:dark){:root{--bg:#121214;--card:#1c1c1f;--ink:#f2f2f4;--mute:#a0a0a8;--line:#2c2c31;--brand:#8fb3e0;--ok:#5cc28a;--no:#f08a82;--warn:#e0b44d;--chip:#24262c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;padding-bottom:84px}
+header{position:sticky;top:0;z-index:5;background:var(--brand);color:#fff;padding:14px 16px calc(12px);display:flex;align-items:center;justify-content:space-between}
+@media (prefers-color-scheme:dark){header{color:#0d1726}}
+header h1{margin:0;font-size:20px;font-weight:700}
+header small{opacity:.85;font-size:13px}
+main{max-width:640px;margin:0 auto;padding:12px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 12px}
+.row{display:flex;gap:12px;align-items:flex-start}
+.thumb{width:84px;height:110px;flex:none;border-radius:8px;background:var(--chip);object-fit:cover;border:1px solid var(--line)}
+.name{font-weight:650;word-break:break-word;unicode-bidi:plaintext}
+.folder{color:var(--mute);font-size:14px;word-break:break-word;unicode-bidi:plaintext}
+.why{font-size:14px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{background:var(--chip);border-radius:999px;padding:2px 10px;font-size:12px}
+.chip.warn{color:var(--warn)} .chip.no{color:var(--no)}
+.btns{display:flex;gap:8px;margin-top:10px}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+.yes{background:var(--ok);color:#fff;flex:1}
+.nope{background:transparent;color:var(--no);border:1px solid var(--line)}
+.edit{background:transparent;color:var(--brand);border:1px solid var(--line)}
+.primary{background:var(--brand);color:#fff;width:100%;padding:14px;font-size:17px}
+@media (prefers-color-scheme:dark){.primary,.yes{color:#0d1726}}
+input[type=text],input[type=search]{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+label{font-size:13px;color:var(--mute);display:block;margin:8px 0 2px}
+.empty{text-align:center;color:var(--mute);padding:28px 8px}
+.done{opacity:.55}
+.status{font-size:13px;font-weight:600}
+.status.ok{color:var(--ok)} .status.no{color:var(--no)}
+nav{position:fixed;bottom:0;inset-inline:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;color:var(--mute);padding:10px 4px 12px;font-size:13px;border-radius:0}
+nav button b{display:block;font-size:20px;line-height:1.2}
+nav button.on{color:var(--brand);font-weight:700}
+.badge{background:var(--no);color:#fff;border-radius:999px;font-size:11px;padding:0 6px;margin-inline-start:4px}
+.list a{display:block;padding:10px 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none}
+.list a{unicode-bidi:plaintext}.list a small{display:block;color:var(--mute)}
+.toast{position:fixed;bottom:96px;inset-inline:16px;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:12px;display:none;z-index:9}
+.hint{font-size:14px;color:var(--mute)}
+section{display:none} section.on{display:block}
+</style>
+</head>
+<body>
+<header><div><h1 id="title">סדר</h1><small id="sub"></small></div><button class="edit" style="color:#fff;border-color:rgba(255,255,255,.4)" id="refresh" aria-label="refresh">⟳</button></header>
+<main>
+  <section id="tab-wait" class="on">
+    <div id="docs"></div>
+    <div id="loose"></div>
+  </section>
+  <section id="tab-cam">
+    <div class="card">
+      <p id="cam-hint" class="hint"></p>
+      <input id="cam" type="file" accept="image/*,application/pdf" capture="environment" multiple hidden>
+      <button class="primary" id="cam-btn"></button>
+      <p id="cam-gallery" style="text-align:center;margin:10px 0 0"><a href="#" id="gal-link"></a></p>
+      <input id="gal" type="file" accept="image/*,application/pdf" multiple hidden>
+      <div id="cam-out"></div>
+    </div>
+  </section>
+  <section id="tab-find">
+    <div class="card"><input type="search" id="q" autocomplete="off"><div class="list" id="results"></div></div>
+  </section>
+</main>
+<nav>
+  <button data-tab="wait" class="on"><b>✓</b><span id="nav-wait"></span><span class="badge" id="badge" hidden></span></button>
+  <button data-tab="cam"><b>📷</b><span id="nav-cam"></span></button>
+  <button data-tab="find"><b>⌕</b><span id="nav-find"></span></button>
+  <button id="nav-review-btn"><b>☰</b><span id="nav-review"></span></button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const T={he:{wait:"לאישור",cam:"צלם",find:"חיפוש",review:"סקירה",approve:"אשר",reject:"דחה",edit:"שנה",save:"שמור ואשר",
+ name:"שם",folder:"תיקייה",nothing:"אין כרגע מה לאשר.",ask:"כדי לקבל הצעות, כתוב ל-Claude: \"תייק את מה שהגיע\".",
+ loose:"בתיבה, עוד בלי הצעה",dup:"כפילות",newf:"תיקייה חדשה",low:"לא בטוח",locked:"נעול: רק שם",skip:"לא לשמור",
+ filed:"תויק ✓",rejected:"נדחה",camhint:"צלם מסמך בטלפון, והוא נכנס ישר לתיבה במחשב. אחר כך Claude יציע לו שם ותיקייה.",
+ cambtn:"📷 צלם מסמך",gal:"או בחר מהגלריה",sent:"נשלח לתיבה",search:"חפש לפי שם: חשמל, ביטוח, 2026-09...",noresults:"לא נמצא",
+ noreview:"אין עדיין סקירה. כתוב ל-Claude: \"תן לי סקירה\".",err:"שגיאה",updated:"עודכן",newfolder_q:"התיקייה הזו עוד לא קיימת. לפתוח אותה ולתייק?",
+ waiting:(n)=>n+" לאישור", pages:(n)=>n+" עמודים"},
+ en:{wait:"Approve",cam:"Snap",find:"Search",review:"Review",approve:"Approve",reject:"Reject",edit:"Edit",save:"Save and approve",
+ name:"Name",folder:"Folder",nothing:"Nothing to approve right now.",ask:"To get proposals, tell Claude: \"file what arrived\".",
+ loose:"In the inbox, no proposal yet",dup:"duplicate",newf:"new folder",low:"unsure",locked:"locked: name only",skip:"do not keep",
+ filed:"Filed ✓",rejected:"Rejected",camhint:"Photograph a document with your phone; it lands in the inbox on your computer. Claude then proposes a name and folder.",
+ cambtn:"📷 Photograph a document",gal:"or pick from the gallery",sent:"Sent to the inbox",search:"Search by name: electricity, insurance, 2026-09...",noresults:"Nothing found",
+ noreview:"No review yet. Tell Claude: \"give me a review\".",err:"Error",updated:"Updated",newfolder_q:"This folder does not exist yet. Create it and file?",
+ waiting:(n)=>n+" to approve", pages:(n)=>n+" pages"}};
+let L=T.he, S=null;
+const $=s=>document.querySelector(s);
+const stem=s=>String(s||"").replace(/\.(pdf|jpe?g|png|heic|webp|xlsx?|docx?)$/i,"");
+const crumbs=s=>String(s||"").split("/").filter(Boolean).map(x=>x.replace(/^\d{2}_/,"").replace(/_/g," ")).join(" › ");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",2600)}
+async function api(path,body,headers){
+  const opt=body===undefined?{}:{method:"POST",headers:Object.assign({"X-Seder":"1","Content-Type":"application/json"},headers||{}),body:(body instanceof Blob)?body:JSON.stringify(body)};
+  const r=await fetch(path,opt); const j=await r.json().catch(()=>({ok:false,error:r.status}));
+  if(!r.ok||j.ok===false) throw new Error(j.error||r.status); return j;
+}
+function labels(){
+  document.documentElement.lang=S.lang; document.documentElement.dir=S.lang==="he"?"rtl":"ltr";
+  L=T[S.lang]||T.he; const nm=S.name||"Seder"; document.title=nm; $("#title").textContent=nm;
+  for(const k of ["wait","cam","find","review"]) $("#nav-"+k).textContent=L[k];
+  $("#cam-hint").textContent=L.camhint; $("#cam-btn").textContent=L.cambtn; $("#gal-link").textContent=L.gal; $("#q").placeholder=L.search;
+}
+function docCard(d){
+  const first=d.pages[0]||""; const chips=[];
+  if(d.duplicate) chips.push(`<span class="chip warn">${L.dup}</span>`);
+  if(d.new_folder) chips.push(`<span class="chip warn">${L.newf}</span>`);
+  if(d.confidence==="low") chips.push(`<span class="chip warn">${L.low}</span>`);
+  if(d.locked) chips.push(`<span class="chip">${L.locked}</span>`);
+  if(d.skip) chips.push(`<span class="chip no">${L.skip}: ${esc(d.skip)}</span>`);
+  if(d.pages.length>1) chips.push(`<span class="chip">${L.pages(d.pages.length)}</span>`);
+  const img=d.status==="waiting"&&first?`<a href="/api/inbox-file?file=${encodeURIComponent(first)}" target="_blank"><img class="thumb" loading="lazy" src="/api/thumb?file=${encodeURIComponent(first)}" alt=""></a>`:`<div class="thumb"></div>`;
+  const st=d.status==="done"?`<div class="status ok">${L.filed}</div>`:d.status==="rejected"?`<div class="status no">${L.rejected}</div>`:"";
+  const btns=d.status==="waiting"?`<div class="btns"><button class="yes" data-a="yes" data-n="${d.n}">${L.approve}</button><button class="edit" data-a="edit" data-n="${d.n}">${L.edit}</button><button class="nope" data-a="no" data-n="${d.n}">${L.reject}</button></div><div id="ed-${d.n}"></div>`:"";
+  return `<div class="card ${d.status!=="waiting"?"done":""}"><div class="row">${img}<div style="flex:1;min-width:0">
+   <div class="name">${esc(d.skip?first:stem(d.name))}</div><div class="folder">${esc(d.skip?"":crumbs(d.folder))}</div>
+   ${d.why||d.summary?`<div class="why">${esc(d.why||d.summary)}</div>`:""}<div class="chips">${chips.join("")}</div>${st}</div></div>${btns}</div>`;
+}
+function render(){
+  labels();
+  const waiting=S.docs.filter(d=>d.status==="waiting");
+  $("#badge").hidden=!waiting.length; $("#badge").textContent=waiting.length;
+  $("#sub").textContent=waiting.length?L.waiting(waiting.length):"";
+  const order=[...waiting,...S.docs.filter(d=>d.status!=="waiting").reverse()];
+  $("#docs").innerHTML=order.length?order.map(docCard).join(""):`<div class="card empty">${L.nothing}<br><span class="hint">${L.ask}</span></div>`;
+  $("#loose").innerHTML=S.inbox.length?`<div class="card"><b>${L.loose} (${S.inbox.length})</b><div class="list">${S.inbox.map(f=>`<a href="/api/inbox-file?file=${encodeURIComponent(f.file)}" target="_blank">${esc(f.file)}${f.held?` <span class="chip">${L.locked}</span>`:""}${f.dup_of&&f.dup_of.length?` <span class="chip warn">${L.dup}</span>`:""}</a>`).join("")}</div><p class="hint">${L.ask}</p></div>`:"";
+}
+async function load(){ try{ S=await api("/api/state"); render(); }catch(e){ toast(L.err+": "+e.message) } }
+async function approve(n,extra){
+  try{ await api("/api/apply",Object.assign({n},extra||{})); toast(L.filed); load() }
+  catch(e){
+    if(e.message==="needs_folder"){ if(confirm(L.newfolder_q)) return approve(n,Object.assign({},extra||{},{mkdir:true})); return }
+    toast(L.err+": "+e.message)
+  }
+}
+async function act(a,n){
+  const d=S.docs.find(x=>x.n===n);
+  if(a==="yes"){
+    approve(n)
+  }else if(a==="no"){
+    try{ await api("/api/reject",{n}); toast(L.rejected); load() }catch(e){ toast(L.err+": "+e.message) }
+  }else if(a==="edit"){
+    const box=$("#ed-"+n); if(box.innerHTML){box.innerHTML="";return}
+    box.innerHTML=`<label>${L.name}</label><input type="text" id="en-${n}" value="${esc(d.name)}"><label>${L.folder}</label><input type="text" id="ef-${n}" value="${esc(d.folder)}"><div class="btns"><button class="yes" id="es-${n}">${L.save}</button></div>`;
+    $("#es-"+n).onclick=()=>approve(n,{name:$("#en-"+n).value.trim(),folder:$("#ef-"+n).value.trim()});
+  }
+}
+document.addEventListener("click",e=>{const b=e.target.closest("button[data-a]"); if(b) act(b.dataset.a,+b.dataset.n)});
+document.querySelectorAll("nav button[data-tab]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id==="tab-"+b.dataset.tab));
+  if(b.dataset.tab==="find") $("#q").focus();
+});
+$("#nav-review-btn").onclick=()=>{ if(S&&S.review) location.href="/review"; else toast(L.noreview) };
+$("#refresh").onclick=async()=>{ try{ await api("/api/pull",{}) }catch(e){} load(); toast(L.updated) };
+async function send(files){
+  for(const f of files){
+    try{ const r=await api("/api/upload",f,{"Content-Type":f.type||"application/octet-stream","X-Filename":encodeURIComponent(f.name||"photo.jpg")});
+      $("#cam-out").insertAdjacentHTML("afterbegin",`<p class="status ok">${L.sent}: ${esc(r.file)}</p>`) }catch(e){ toast(L.err+": "+e.message) }
+  }
+  load();
+}
+$("#cam-btn").onclick=()=>$("#cam").click(); $("#gal-link").onclick=e=>{e.preventDefault();$("#gal").click()};
+$("#cam").onchange=e=>send([...e.target.files]); $("#gal").onchange=e=>send([...e.target.files]);
+let qt; $("#q").oninput=e=>{clearTimeout(qt); qt=setTimeout(async()=>{ const q=e.target.value.trim(); if(!q){$("#results").innerHTML="";return}
+  try{ const r=await api("/api/search?q="+encodeURIComponent(q)); $("#results").innerHTML=r.results.length?r.results.map(x=>`<a href="/api/file?path=${encodeURIComponent(x.path)}" target="_blank">${esc(stem(x.name))}<small>${esc(crumbs(x.path.split("/").slice(0,-1).join("/")))}</small></a>`).join(""):`<p class="empty">${L.noresults}</p>` }catch(err){ toast(L.err) } },250)};
+load(); setInterval(()=>{ if(document.visibilityState==="visible") load() },20000);
+</script>
+</body>
+</html>
