@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 - 2026-11-08 (first outside tester)
 
 - Onboarding v2: the person names the archive (`init --name`, `adopt --name`,
   `rename NAME [--folder]`); the name appears on the review page.

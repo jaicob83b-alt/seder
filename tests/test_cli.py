@@ -16,7 +16,7 @@ def run_cli(*args):
 def test_version_prints_json():
     r = run_cli("version")
     assert r.returncode == 0
-    assert json.loads(r.stdout) == {"ok": True, "version": "0.1.0"}
+    assert json.loads(r.stdout) == {"ok": True, "version": "0.2.0"}
 
 
 def test_unknown_command_is_json_error():

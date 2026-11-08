@@ -10,7 +10,7 @@
       "name": "seder",
       "source": "./",
       "description": "A private document archive on your own disk: standard tree, approval-first filing, per-folder privacy levels, project cards, weekly review.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "productivity",
       "keywords": ["documents", "archive", "privacy", "hebrew"]
     }
