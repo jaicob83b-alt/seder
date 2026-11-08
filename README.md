@@ -25,8 +25,19 @@ From a local clone instead: `claude plugin marketplace add C:\path\to\seder` and
 same install line. Update later with `claude plugin update seder@seder`.
 
 Then open Claude Code and say **"set up my archive"** (or in Hebrew: **"תקים לי ארכיון"**).
-The onboarding checks your machine (`brain.py doctor`), asks one question at a time,
-and creates the archive or adopts the folder you already have, without moving a file.
+The first meeting:
+
+1. Checks your machine and installs what is missing, after a yes.
+2. Asks what you want to call the archive ("Seder", "Dana's cabinet", anything; renamable).
+3. Asks to look, then scans Documents, Downloads, Desktop, OneDrive and Google Drive by
+   **names only**: no file is opened or moved.
+4. Shows what it found: how many documents, where, and about what ("38 about motorcycles").
+5. Interviews you from those findings, one question at a time.
+6. Proposes a **tree tailored to you** (a rider gets a wider vehicles branch), as a table;
+   nothing is created until you say yes.
+7. Asks for a first document.
+
+A folder you already keep in order is adopted as it is, without moving a file.
 
 Requirements: Python 3.11+, `pymupdf`, `Pillow`, `openpyxl`
 (`python -m pip install pymupdf Pillow openpyxl`), Claude Code.

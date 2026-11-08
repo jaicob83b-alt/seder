@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Onboarding v2: the person names the archive (`init --name`, `adopt --name`,
+  `rename NAME [--folder]`); the name appears on the review page.
+- `discover`: with a yes, a names-only first look at Documents, Downloads, Desktop and
+  cloud-sync folders: documents per place, biggest folders, topics recognised in names
+  (`assets/topics.json`), organised archives and existing instances, and a suggested
+  plan. Never prints a file name; medical topics are a count only.
+- Tailored tree: `tree.build` applies a plan (rename, subfolders, subfolders_add, drop,
+  items, extra branches, add-ons); `tree-preview` shows it; `init --plan` creates it.
+- The onboarding reference follows the new order: machine, name, look, findings,
+  interview from findings, tailored tree, create or adopt, first document.
+- `allowed-tools` in both skills' frontmatter.
+
 ## 0.1.0 - 2026-11-11
 
 First release, built for lesson 15 of the AI Dev course.

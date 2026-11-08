@@ -129,7 +129,9 @@ def render(data: dict, template: str) -> str:
 
 def build(cfg, today: dt.date) -> tuple[Path, dict]:
     data = compute(cfg, today)
-    data["title"] = TITLE.get(cfg.lang, TITLE["en"])
+    title = TITLE.get(cfg.lang, TITLE["en"])
+    archive_name = str(cfg.data.get("name") or "").strip()
+    data["title"] = f"{title} · {archive_name}" if archive_name else title
     data["lang"] = cfg.lang
     data["counts"] = {"gaps": len(data["gaps"]), "open": len(data["open"]), "archive": len(data["archive_candidates"])}
     template = (ASSETS / f"review.{cfg.lang}.html").read_text(encoding="utf-8")

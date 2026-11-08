@@ -18,12 +18,14 @@ from datetime import date
 from pathlib import Path
 
 from . import names, sensitive, tree
+from . import config as _config
 from .config import BRAIN_FILE, Config
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
 TEMPLATES = ASSETS / "templates"
 SKIP_TOP_PREFIXES = (".", "_", "~$", "My ")
 NUM_RE = re.compile(r"^(\d{2})[_ -]?(.*)$")
+DEFAULT_NAME = {"he": "סדר", "en": "Seder"}
 
 # keyword -> standard branch id, for the adoption proposal (first match wins)
 PROPOSAL_KEYWORDS = [
@@ -87,24 +89,27 @@ def _template(kind: str, lang: str) -> str:
     return (TEMPLATES / f"{kind}.{lang}.md").read_text(encoding="utf-8")
 
 
-def create(home: Path, root: Path, lang: str, owner: str, entities: list[str], addons: list[str] = ()) -> Config:
-    """A new instance in `home` for the documents under `root`. Creates no branch folders."""
+def create(home: Path, root: Path, lang: str, owner: str, entities: list[str], addons: list[str] = (),
+           plan: dict | None = None, name: str = "") -> Config:
+    """A new instance in `home` for the documents under `root`. Creates no branch folders.
+
+    `plan` tailors the standard tree (see tree.build); `name` is what the person calls
+    the archive ("Seder", "Dana's cabinet"), shown in answers and on the review page."""
     home, root = Path(home), Path(root)
     if lang not in names.LANGS:
         raise ValueError(f"unsupported lang: {lang}")
     if (home / BRAIN_FILE).exists():
         raise FileExistsError(f"an instance already exists: {home / BRAIN_FILE}")
     root.mkdir(parents=True, exist_ok=True)
-    branches = tree.default_tree(lang)
-    wanted = set(addons or [])
-    branches += [a for a in tree.addons(lang) if a["id"] in wanted]
-    branches.sort(key=lambda n: n["num"])
+    branches = tree.build(lang, list(addons or []), plan)
     branches[0]["physical"] = home.name  # the brain folder is wherever the person put it
+    if name:
+        branches[0]["name"] = tree._check_name(name)
     home.mkdir(parents=True, exist_ok=True)
     cfg = Config(home=home, root=root, lang=lang, owner=owner, entities=list(entities),
                  tree=branches,
                  sources={"inbox": True, "gmail": False, "whatsapp": False, "downloads": False, "site": False},
-                 data={"version": 1, "remote_warning": True})
+                 data={"version": 1, "remote_warning": True, "name": name or DEFAULT_NAME[lang]})
     cfg.save()
     cfg.path("inbox").mkdir(exist_ok=True)
     for kind in ("index", "ledger", "log"):
@@ -168,7 +173,7 @@ def _write_proposal(cfg: Config, counts: dict[str, int]) -> None:
     cfg.path("proposed_tree").write_text("\n".join(lines), encoding="utf-8")
 
 
-def adopt(home: Path, root: Path, addons: list[str] = ()) -> Config:
+def adopt(home: Path, root: Path, addons: list[str] = (), name: str = "") -> Config:
     """Register an existing archive as the instance, touching none of its files.
 
     `addons` (e.g. dev_projects, studies) are appended as new branches with their
@@ -200,7 +205,8 @@ def adopt(home: Path, root: Path, addons: list[str] = ()) -> Config:
             branches.append(node)
     cfg = Config(home=home, root=root, lang=lang, owner="", entities=[], tree=branches,
                  sources={"inbox": True, "gmail": False, "whatsapp": False, "downloads": False, "site": False},
-                 data={"version": 1, "remote_warning": True, "adopted": date.today().isoformat()})
+                 data={"version": 1, "remote_warning": True, "adopted": date.today().isoformat(),
+                       "name": name or DEFAULT_NAME[lang]})
     cfg.save()
     if not cfg.path("inbox").exists():
         cfg.path("inbox").mkdir()
@@ -253,3 +259,47 @@ def scan(cfg: Config) -> dict:
         if 1 <= depth <= 2:
             folders.append({"path": rel.as_posix(), "files": len(files), "sensitive": sensitive.is_sensitive(cfg, rel.as_posix())})
     return {"folders": folders, "total": total}
+
+
+def rename(cfg: Config, new_name: str, move_folder: bool = False) -> dict:
+    """Change what the person calls the archive. With `move_folder`, the brain folder follows the name.
+
+    The display name lives in brain.json. Moving the folder renames only the brain folder
+    (documents stay where they are, their paths are relative to the root), rewrites the
+    ~/.seder/home pointer when it pointed here, and updates the path in the naming and
+    profile files. Refuses when the new folder already exists."""
+    new_name = tree._check_name(new_name)
+    old_home = cfg.home
+    out = {"name": new_name, "home": str(old_home), "moved": False, "pointer_updated": False, "warnings": []}
+    cfg.data["name"] = new_name
+    brain = next((n for n in cfg.tree if n.get("id") == "brain"), None)
+    if brain is not None:
+        brain["name"] = new_name
+    if move_folder:
+        prefix = "00_" if old_home.name.startswith("00") else ""
+        new_home = old_home.parent / (prefix + new_name.replace(" ", "_"))
+        if new_home.resolve() != old_home.resolve():
+            if new_home.exists():
+                raise FileExistsError(f"already exists: {new_home}")
+            os.rename(old_home, new_home)
+            cfg.home = new_home
+            if brain is not None:
+                brain["physical"] = new_home.name
+            for key in ("naming", "profile"):
+                p = cfg.path(key)
+                if p.is_file():
+                    text = p.read_text(encoding="utf-8")
+                    text = text.replace(str(old_home), str(new_home)).replace(old_home.name, new_home.name)
+                    p.write_text(text, encoding="utf-8")
+            ptr = _config.HOME_POINTER
+            try:
+                if ptr.is_file() and Path(ptr.read_text(encoding="utf-8").strip().splitlines()[0].strip()) == old_home:
+                    ptr.write_text(str(new_home) + "\n", encoding="utf-8")
+                    out["pointer_updated"] = True
+            except (OSError, IndexError):
+                out["warnings"].append("could not read or update the ~/.seder/home pointer")
+            if os.environ.get(_config.ENV_VAR) and Path(os.environ[_config.ENV_VAR]) == old_home:
+                out["warnings"].append(f"{_config.ENV_VAR} still points at the old folder; update it")
+            out.update(moved=True, home=str(new_home))
+    cfg.save()
+    return out
