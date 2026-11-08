@@ -1,0 +1,418 @@
+{
+ "_about": "Topics the discovery scan recognises in file and folder names (names only, never content). Each topic points at the branch it belongs to, and may suggest an expansion of that branch for the tailored tree. Hebrew words match as substrings; Latin words match whole tokens. A topic marked count_only is reported as a number, never with folder names.",
+ "min_hits": 3,
+ "topics": [
+  {
+   "id": "motorcycles",
+   "branch": "vehicles",
+   "words": [
+    "אופנוע",
+    "אופנועים",
+    "קטנוע",
+    "motorcycle",
+    "motorbike",
+    "scooter",
+    "moto"
+   ],
+   "label": {
+    "he": "אופנועים",
+    "en": "motorcycles"
+   },
+   "question": {
+    "he": "יש לך כמה אופנועים? לפתוח תיקייה לכל אחד, עם ציוד ואביזרים?",
+    "en": "How many motorcycles? A folder for each, with gear and accessories?"
+   },
+   "plan": {
+    "rename": {
+     "vehicles": {
+      "he": "רכב ואופנועים",
+      "en": "Vehicles and motorcycles"
+     }
+    },
+    "subfolders_add": {
+     "vehicles": {
+      "he": [
+       "קנייה ומכירה",
+       "ציוד ואביזרים",
+       "תאונות ותביעות"
+      ],
+      "en": [
+       "Purchase and sale",
+       "Gear and accessories",
+       "Accidents and claims"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "vehicles",
+   "branch": "vehicles",
+   "words": [
+    "רכב",
+    "טסט",
+    "רישיון רכב",
+    "מוסך",
+    "ליסינג",
+    "car",
+    "vehicle",
+    "garage",
+    "leasing"
+   ],
+   "label": {
+    "he": "רכב",
+    "en": "vehicles"
+   },
+   "question": {
+    "he": "כמה רכבים יש בבית? תיקייה לכל רכב.",
+    "en": "How many vehicles in the household? One folder each."
+   },
+   "plan": {
+    "subfolders_add": {
+     "vehicles": {
+      "he": [
+       "קנייה ומכירה"
+      ],
+      "en": [
+       "Purchase and sale"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "payslips",
+   "branch": "finance",
+   "words": [
+    "תלוש",
+    "משכורת",
+    "שכר",
+    "106",
+    "payslip",
+    "salary",
+    "payroll",
+    "p60",
+    "w2"
+   ],
+   "label": {
+    "he": "תלושי שכר",
+    "en": "payslips"
+   },
+   "question": {
+    "he": "התלושים הם שלך בלבד, או גם של בן או בת זוג?",
+    "en": "Are the payslips only yours, or a partner's too?"
+   }
+  },
+  {
+   "id": "bank",
+   "branch": "finance",
+   "words": [
+    "בנק",
+    "עו\"ש",
+    "עובר ושב",
+    "דף חשבון",
+    "bank",
+    "statement"
+   ],
+   "label": {
+    "he": "בנק",
+    "en": "bank"
+   },
+   "question": {
+    "he": "כמה חשבונות בנק יש? (רק השם של הבנק, בלי מספרים)",
+    "en": "How many bank accounts? (bank name only, no numbers)"
+   }
+  },
+  {
+   "id": "cards",
+   "branch": "finance",
+   "words": [
+    "אשראי",
+    "ישראכרט",
+    "כאל",
+    "לאומי קארד",
+    "ויזה",
+    "credit",
+    "visa",
+    "mastercard",
+    "amex"
+   ],
+   "label": {
+    "he": "כרטיסי אשראי",
+    "en": "credit cards"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "mortgage",
+   "branch": "finance",
+   "words": [
+    "משכנתא",
+    "הלוואה",
+    "mortgage",
+    "loan"
+   ],
+   "label": {
+    "he": "הלוואות ומשכנתא",
+    "en": "loans and mortgage"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "pension",
+   "branch": "finance",
+   "words": [
+    "פנסיה",
+    "גמל",
+    "השתלמות",
+    "pension",
+    "401k",
+    "ira"
+   ],
+   "label": {
+    "he": "פנסיה וחיסכון",
+    "en": "pension and savings"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "tax",
+   "branch": "finance",
+   "words": [
+    "מס הכנסה",
+    "1301",
+    "ביטוח לאומי",
+    "החזר מס",
+    "tax",
+    "irs",
+    "hmrc"
+   ],
+   "label": {
+    "he": "מס",
+    "en": "tax"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "insurance",
+   "branch": "finance",
+   "words": [
+    "ביטוח",
+    "פוליסה",
+    "insurance",
+    "policy"
+   ],
+   "label": {
+    "he": "ביטוח",
+    "en": "insurance"
+   },
+   "question": {
+    "he": "הביטוחים הולכים לדבר שהם מבטחים: ביטוח רכב לרכב, ביטוח דירה לבית. בסדר?",
+    "en": "Insurance goes to the thing it covers: car insurance to the car, home insurance to the home. OK?"
+   }
+  },
+  {
+   "id": "home",
+   "branch": "home",
+   "words": [
+    "שכירות",
+    "ארנונה",
+    "חשמל",
+    "ועד בית",
+    "דירה",
+    "rent",
+    "lease",
+    "electricity",
+    "utility",
+    "council",
+    "חשבון מים",
+    "חברת גז"
+   ],
+   "label": {
+    "he": "בית וחשבונות",
+    "en": "home and bills"
+   },
+   "question": {
+    "he": "שוכר או בעלים? כמה נכסים?",
+    "en": "Renting or owning? How many properties?"
+   }
+  },
+  {
+   "id": "business",
+   "branch": "business",
+   "words": [
+    "חשבונית",
+    "קבלה",
+    "עוסק",
+    "בע\"מ",
+    "invoice",
+    "receipt",
+    "ltd",
+    "llc",
+    "vat"
+   ],
+   "label": {
+    "he": "עסק",
+    "en": "business"
+   },
+   "question": {
+    "he": "יש לך עסק או עבודה כעצמאי? איך קוראים לו?",
+    "en": "Do you run a business or freelance? What is it called?"
+   }
+  },
+  {
+   "id": "education",
+   "branch": "family",
+   "words": [
+    "תעודה",
+    "ציונים",
+    "בית ספר",
+    "אוניברסיטה",
+    "תואר",
+    "קורס",
+    "school",
+    "university",
+    "diploma",
+    "transcript",
+    "course"
+   ],
+   "label": {
+    "he": "לימודים ותעודות",
+    "en": "education"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "travel",
+   "branch": "family",
+   "words": [
+    "דרכון",
+    "טיסה",
+    "כרטיס טיסה",
+    "passport",
+    "flight",
+    "boarding",
+    "אשרת כניסה"
+   ],
+   "label": {
+    "he": "נסיעות ודרכונים",
+    "en": "travel and passports"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "pets",
+   "branch": "pets",
+   "words": [
+    "וטרינר",
+    "כלב",
+    "חתול",
+    "חיסון כלבת",
+    "vet",
+    "veterinary",
+    "dog",
+    "cat"
+   ],
+   "label": {
+    "he": "חיות מחמד",
+    "en": "pets"
+   },
+   "question": {
+    "he": "יש חיית מחמד? לפתוח לה תיקייה?",
+    "en": "Any pets? A folder for each?"
+   }
+  },
+  {
+   "id": "military",
+   "branch": "military",
+   "words": [
+    "צה\"ל",
+    "מילואים",
+    "צבא",
+    "שחרור",
+    "army",
+    "military",
+    "reserve"
+   ],
+   "label": {
+    "he": "צבא ומילואים",
+    "en": "military"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "legal",
+   "branch": "family",
+   "words": [
+    "עורך דין",
+    "עו\"ד",
+    "פסק דין",
+    "תביעה",
+    "ייפוי כוח",
+    "צוואה",
+    "lawyer",
+    "court",
+    "will",
+    "attorney"
+   ],
+   "label": {
+    "he": "משפטי",
+    "en": "legal"
+   },
+   "question": {
+    "he": "",
+    "en": ""
+   }
+  },
+  {
+   "id": "medical",
+   "branch": "family",
+   "count_only": true,
+   "words": [
+    "רפואי",
+    "רופא",
+    "מרשם",
+    "בדיקת דם",
+    "קופת חולים",
+    "כללית",
+    "מכבי",
+    "מאוחדת",
+    "לאומית",
+    "medical",
+    "doctor",
+    "clinic",
+    "prescription",
+    "hospital"
+   ],
+   "label": {
+    "he": "בריאות",
+    "en": "health"
+   },
+   "question": {
+    "he": "יש מסמכים שנראים רפואיים. תיקיות הבריאות נעולות כברירת מחדל (רק שמות). להשאיר נעול, או שאלה לפני כל פתיחה?",
+    "en": "Some documents look medical. Health folders are locked by default (names only). Keep locked, or ask before each opening?"
+   }
+  }
+ ]
+}

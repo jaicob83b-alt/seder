@@ -13,7 +13,7 @@ TODAY = date(2026, 11, 7)
 
 
 def _age(p: Path, days: int):
-    t = time.time() - days * 86400
+    t = time.time() - days * 86400 - 3600  # an hour of slack: mtime rounding must not turn 20 days into 19
     os.utime(p, (t, t))
 
 

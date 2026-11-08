@@ -53,7 +53,8 @@ def test_brain_skill_points_at_every_cli_command_it_needs():
                     ("intake.md", "onboarding.md", "naming.md", "project.md", "privacy.md"))
     text = body + refs
     for cmd in ("brain.py doctor", "brain.py init", "brain.py adopt", "brain.py inbox", "brain.py intake-apply",
-                "brain.py namecheck", "brain.py privacy", "brain.py ledger", "brain.py project"):
+                "brain.py namecheck", "brain.py privacy", "brain.py ledger", "brain.py project",
+                "brain.py discover", "brain.py tree-preview", "brain.py rename"):
         assert cmd in text, cmd
 
 

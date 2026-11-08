@@ -43,6 +43,88 @@ def addons(lang: str) -> list[dict]:
     return [_node(i) for i in _asset(lang)["addons"]]
 
 
+PLAN_KEYS = {"addons", "rename", "subfolders", "subfolders_add", "drop", "items", "extra"}
+KEEP = {"brain", "archive"}
+
+
+def _check_name(name: str) -> str:
+    name = str(name).strip()
+    if not name or FORBIDDEN.search(name) or name != name.rstrip(". ") or name in (".", ".."):
+        raise ValueError(f"bad folder name: {name!r}")
+    return name
+
+
+def build(lang: str, addon_ids: list[str] = (), plan: dict | None = None) -> list[dict]:
+    """The standard tree, plus add-ons, tailored by a plan the person approved.
+
+    plan keys (all optional):
+      addons          more add-on ids
+      rename          {branch_id: new name}         the physical folder follows the new name
+      subfolders      {branch_id: [names]}          replaces the allowed subfolders
+      subfolders_add  {branch_id: [names]}          appends to them
+      drop            [branch_id]                   a standard branch the person does not want (not 00, not 99)
+      items           {branch_id: [names]}          the known items of a per-item branch (a car, a person)
+      extra           [{name, subfolders, per_item, item, rule}]  a branch of their own, numbered after the rest
+    Nothing here creates a folder; folders appear with the first filed document.
+    """
+    plan = dict(plan or {})
+    unknown = set(plan) - PLAN_KEYS
+    if unknown:
+        raise ValueError(f"unknown plan key(s): {', '.join(sorted(unknown))}")
+    branches = default_tree(lang)
+    known_addons = {a["id"]: a for a in addons(lang)}
+    wanted = list(dict.fromkeys(list(addon_ids or []) + list(plan.get("addons") or [])))
+    bad = [a for a in wanted if a not in known_addons]
+    if bad:
+        raise ValueError(f"unknown add-on(s): {', '.join(bad)}; choose from {', '.join(known_addons)}")
+    branches += [known_addons[a] for a in wanted]
+    by_id = {n["id"]: n for n in branches}
+
+    def node(bid):
+        if bid not in by_id:
+            raise ValueError(f"unknown branch in plan: {bid!r}")
+        return by_id[bid]
+
+    drop = set(plan.get("drop") or [])
+    if drop & KEEP:
+        raise ValueError("the brain (00) and archive (99) branches cannot be dropped")
+    for bid in drop:
+        node(bid)
+    for bid, name in (plan.get("rename") or {}).items():
+        n = node(bid)
+        n["name"] = _check_name(name)
+        n["physical"] = physical_name(n["num"], n["name"])
+    for bid, subs in (plan.get("subfolders") or {}).items():
+        node(bid)["subfolders"] = [_check_name(s) for s in subs]
+    for bid, subs in (plan.get("subfolders_add") or {}).items():
+        n = node(bid)
+        n["subfolders"] = list(n.get("subfolders", []))
+        for s in subs:
+            s = _check_name(s)
+            if s not in n["subfolders"]:
+                n["subfolders"].append(s)
+    for bid, items in (plan.get("items") or {}).items():
+        n = node(bid)
+        if not n.get("per_item"):
+            raise ValueError(f"branch {bid!r} has no items (it is not one folder per item)")
+        n["items"] = [_check_name(i) for i in items]
+    branches = [n for n in branches if n["id"] not in drop]
+    used = {int(n["num"]) for n in branches if str(n["num"]).isdigit()} | {int(a["num"]) for a in known_addons.values()}
+    for ex in plan.get("extra") or []:
+        name = _check_name(ex["name"])
+        num = next(i for i in range(7, 99) if i not in used)
+        used.add(num)
+        bid = re.sub(r"\W+", "_", name).strip("_").lower() or f"extra_{num}"
+        if bid in {n["id"] for n in branches}:
+            bid = f"{bid}_{num}"
+        branches.append(_node({"id": bid, "num": f"{num:02d}", "name": name,
+                               "per_item": bool(ex.get("per_item", False)), "item": ex.get("item", ""),
+                               "subfolders": [_check_name(s) for s in ex.get("subfolders", [])],
+                               "locked_subfolders": [], "rule": ex.get("rule", ""), "custom": True}))
+    branches.sort(key=lambda n: n["num"])
+    return branches
+
+
 def normalize(folder: str) -> str:
     # slashes only: a trailing space or dot inside a segment must stay visible to check_target
     return str(folder).replace("\\", "/").strip("/")

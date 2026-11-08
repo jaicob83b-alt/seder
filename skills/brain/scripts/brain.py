@@ -16,7 +16,8 @@ import datetime as dt  # noqa: E402
 import json  # noqa: E402
 
 import seder  # noqa: E402
-from seder import config, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, prune, sensitive, studies  # noqa: E402
+from seder import tree  # noqa: E402
+from seder import config, discover, doctor, emit, filing, inbox, index, init, ledger, names, pdf, project, prune, sensitive, studies  # noqa: E402
 
 NO_HOME = "לא נמצאה תיקיית מוח / no archive found: run init, or set SEDER_HOME"
 
@@ -87,11 +88,28 @@ def build_parser() -> _Parser:
     pinit.add_argument("--owner", default="")
     pinit.add_argument("--entities", default="", help="comma-separated people and businesses")
     pinit.add_argument("--addons", default="", help="comma-separated addon ids, e.g. dev_projects,studies")
+    pinit.add_argument("--plan", help="JSON file: the tailored tree the person approved (see tree-preview)")
+    pinit.add_argument("--name", default="", help="what the person calls the archive")
 
     padopt = sub.add_parser("adopt", help="register an existing archive: adopt --home DIR --root DIR")
     padopt.add_argument("--home", default=argparse.SUPPRESS, help="the existing brain folder")
     padopt.add_argument("--root", required=True)
     padopt.add_argument("--addons", default="", help="comma-separated addon ids to register, e.g. dev_projects,studies")
+    padopt.add_argument("--name", default="", help="what the person calls the archive")
+
+    pdisc = sub.add_parser("discover", help="before an archive exists, with a yes: where documents live and which topics, names only")
+    pdisc.add_argument("--roots", nargs="*", help="folders to look in (default: Documents, Downloads, Desktop, cloud-sync folders)")
+    pdisc.add_argument("--lang", default="he", choices=list(names.LANGS))
+    pdisc.add_argument("--max-depth", type=int, default=discover.DEFAULT_MAX_DEPTH)
+
+    pprev = sub.add_parser("tree-preview", help="the tree init would create, from add-ons and a plan; writes nothing")
+    pprev.add_argument("--lang", default="he", choices=list(names.LANGS))
+    pprev.add_argument("--addons", default="")
+    pprev.add_argument("--plan", help="JSON file with the tailored tree")
+
+    pren = sub.add_parser("rename", help="change the archive's name; --folder also renames the brain folder")
+    pren.add_argument("name")
+    pren.add_argument("--folder", action="store_true")
 
     sub.add_parser("scan", help="folders up to depth 2 with file counts, names only")
 
@@ -224,18 +242,47 @@ def cmd_doctor(args) -> dict:
 def cmd_init(args) -> dict:
     if not args.home:
         raise CliError("init needs --home DIR (the brain folder to create)")
-    cfg = init.create(Path(args.home), Path(args.root), args.lang, args.owner, _split_list(args.entities), _split_list(args.addons))
-    return {"ok": True, "home": str(cfg.home), "root": str(cfg.root), "lang": cfg.lang,
+    cfg = init.create(Path(args.home), Path(args.root), args.lang, args.owner, _split_list(args.entities),
+                      _split_list(args.addons), plan=_read_plan(args.plan), name=args.name)
+    return {"ok": True, "home": str(cfg.home), "root": str(cfg.root), "lang": cfg.lang, "name": cfg.data.get("name"),
             "tree": [{"num": n["num"], "name": n["name"], "physical": n["physical"]} for n in cfg.tree]}
 
 
 def cmd_adopt(args) -> dict:
     if not args.home:
         raise CliError("adopt needs --home DIR (the existing brain folder)")
-    cfg = init.adopt(Path(args.home), Path(args.root), _split_list(args.addons))
+    cfg = init.adopt(Path(args.home), Path(args.root), _split_list(args.addons), name=args.name)
     return {"ok": True, "home": str(cfg.home), "root": str(cfg.root), "lang": cfg.lang,
             "tree": [{"num": n["num"], "name": n["name"], "physical": n["physical"], "handoff": n["handoff"]} for n in cfg.tree],
             "proposed_tree": str(cfg.path("proposed_tree"))}
+
+
+def _read_plan(path: str | None) -> dict | None:
+    if not path:
+        return None
+    try:
+        plan = json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as e:
+        raise CliError(f"cannot read plan {path}: {e}")
+    if not isinstance(plan, dict):
+        raise CliError("the plan must be a JSON object")
+    return plan
+
+
+def cmd_discover(args) -> dict:
+    roots = [Path(r) for r in args.roots] if args.roots else None
+    return {"ok": True, **discover.discover(roots, max_depth=args.max_depth, lang=args.lang)}
+
+
+def cmd_tree_preview(args) -> dict:
+    branches = tree.build(args.lang, _split_list(args.addons), _read_plan(args.plan))
+    return {"ok": True, "tree": [{"num": n["num"], "name": n["name"], "physical": n["physical"],
+                                  "subfolders": n.get("subfolders", []), "items": n.get("items", []),
+                                  "per_item": n.get("per_item", False)} for n in branches]}
+
+
+def cmd_rename(args) -> dict:
+    return {"ok": True, **init.rename(load_cfg(args), args.name, move_folder=args.folder)}
 
 
 def cmd_scan(args) -> dict:
@@ -341,6 +388,9 @@ HANDLERS = {
     "init": cmd_init,
     "adopt": cmd_adopt,
     "scan": cmd_scan,
+    "discover": cmd_discover,
+    "tree-preview": cmd_tree_preview,
+    "rename": cmd_rename,
     "inbox": cmd_inbox,
     "intake-apply": cmd_intake_apply,
     "project": cmd_project,

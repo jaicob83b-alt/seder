@@ -1,6 +1,7 @@
 ---
 name: brain
 description: Seder, a private document archive on the person's own disk. A standard folder tree, approval-first filing of documents from an inbox or from photos sent to the chat, finding documents by name, project cards, and per-folder privacy levels. Use this skill whenever the user wants to file, sort, name, archive or find personal or household documents (bills, payslips, contracts, letters, scans, PDFs, photos of paperwork), set up or adopt a document archive, open a project card, or asks what their archive sends to Anthropic, even when they never say "Seder". Hebrew triggers - תייק, תסדר את המסמכים, איפה החשבון, הארון, קליטה, מה הגיע, כרטיס פרויקט, תפתח פרויקט, המוח. English triggers - file this, sort my documents, where is the electricity bill, what arrived, set up my archive, new project card.
+allowed-tools: Read, Glob, Grep, Bash(python *)
 ---
 
 # Seder: the `brain` skill
@@ -43,7 +44,7 @@ when installed as a plugin). Every command prints exactly one JSON line:
 |---|---|---|
 | to file what arrived, photos sent to the chat, "תייק", "מה הגיע", "file this" | `references/intake.md` | inbox -> proposal -> yes -> intake-apply |
 | to find a document, "איפה החשבון", "where is" | `references/naming.md` (retrieval section) | names first, content only with consent |
-| a new archive, or to register an existing folder | `references/onboarding.md` | doctor, questions, init or adopt |
+| a new archive, or to register an existing folder | `references/onboarding.md` | doctor, name, discover, interview, tree-preview, init or adopt |
 | a project card, "תפתח פרויקט", "new project" | `references/project.md` | `brain.py project new` |
 | to connect Gmail, WhatsApp, the phone | `references/sources.md` | explain what each sends, enable with consent |
 | to know what leaves the computer, lock a folder | `references/privacy.md` | `brain.py privacy` |
@@ -55,8 +56,11 @@ when installed as a plugin). Every command prints exactly one JSON line:
 | Command | Does |
 |---|---|
 | `brain.py doctor` | environment checks, where the instance is |
-| `brain.py init --home DIR --root DIR --lang he\|en --owner NAME --entities a,b --addons dev_projects,studies` | new instance |
-| `brain.py adopt --home DIR --root DIR` | register an existing archive as it is; writes a proposed tree, moves nothing |
+| `brain.py init --home DIR --root DIR --lang he\|en --owner NAME --entities a,b --name NAME --plan FILE` | new instance with a tailored tree |
+| `brain.py adopt --home DIR --root DIR [--name NAME]` | register an existing archive as it is; writes a proposed tree, moves nothing |
+| `brain.py discover [--roots DIR...]` | before an archive exists, after a yes: where documents live and which topics, counts and folder names only |
+| `brain.py tree-preview --plan FILE` | the tailored tree init would create; writes nothing |
+| `brain.py rename NAME [--folder]` | the archive's own name; `--folder` also renames the brain folder |
 | `brain.py scan` | folders to depth 2 with counts, names only |
 | `brain.py inbox` | what is waiting: size, hash, duplicates, quarantine, suggested names |
 | `brain.py intake-apply --approve 1,3 --name 2=NAME --folder 3=FOLDER --mkdir 3` | file the approved rows of `_proposal.json` |
