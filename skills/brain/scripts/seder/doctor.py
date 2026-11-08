@@ -36,12 +36,12 @@ def _which(cid, names, required, fix, detail_ok=None):
 def _claude_cli():
     exe = shutil.which("claude")
     if not exe:
-        return _check("claude_cli", False, "claude not found on PATH", True, "install Claude Code: https://docs.claude.com/en/docs/claude-code")
+        return _check("claude_cli", False, "claude not on PATH (fine inside the desktop app; needed only for 'claude plugin' commands in a terminal)", False, "optional: install the Claude Code CLI")
     try:
         r = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=15)
-        return _check("claude_cli", r.returncode == 0, (r.stdout or r.stderr).strip()[:80], True, "" if r.returncode == 0 else "reinstall Claude Code")
+        return _check("claude_cli", r.returncode == 0, (r.stdout or r.stderr).strip()[:80], False, "" if r.returncode == 0 else "reinstall Claude Code")
     except Exception as e:
-        return _check("claude_cli", False, f"claude --version failed: {e.__class__.__name__}", True, "reinstall Claude Code")
+        return _check("claude_cli", False, f"claude --version failed: {e.__class__.__name__}", False, "reinstall Claude Code")
 
 
 def _remote_control():
@@ -63,7 +63,7 @@ def checks() -> list[dict]:
         _module("PIL", "pillow", "python -m pip install Pillow"),
         _module("openpyxl", "openpyxl", "python -m pip install openpyxl"),
         _claude_cli(),
-        _which("git", ["git"], True, "install git: https://git-scm.com"),
+        _which("git", ["git"], False, "optional: git, only to install or update the plugin from GitHub"),
         _which("tailscale", ["tailscale"], False, "optional, for the phone site: https://tailscale.com/download"),
         _which("syncthing", ["syncthing"], False, "optional, for WhatsApp/phone folders: https://syncthing.net"),
         _which("office", ["winword", "WINWORD.EXE"], False, "optional (Windows): Microsoft Office converts xlsx/docx to PDF"),

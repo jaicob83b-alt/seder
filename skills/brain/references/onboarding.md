@@ -13,9 +13,9 @@ interview from the findings, show the tailored tree, create or adopt, first docu
 `python -I -X utf8 "<skill dir>/scripts/brain.py" doctor`
 
 Explain the checks that are not ok in plain words. Required ones (Python, pymupdf,
-Pillow, openpyxl, Claude Code, git) block intake; offer the `fix` command and run it
-only after a yes. Optional ones (Tailscale, Syncthing, Office or LibreOffice,
-Tesseract) are mentioned only when the matching source comes up. If `remote_control`
+Pillow, openpyxl) block intake; offer the `fix` command and run it
+only after a yes. Optional ones (the `claude` CLI, git, Tailscale, Syncthing, Office or
+LibreOffice, Tesseract) are mentioned only when the matching source comes up. If `remote_control`
 is on, say the Remote Control sentence from `privacy.md` once.
 
 ## 2. The name
